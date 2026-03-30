@@ -25,53 +25,87 @@ class SubTabsBar extends StatelessWidget {
     if (subs == null) return const SizedBox.shrink();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: subs.map((sub) {
-          final isOn = prov.currentSub == sub['id'] ||
-              (prov.currentSub.isEmpty && (sub['id'] as String).contains('_all'));
-          final cnt = prov.subTabCount(sub['id'] as String);
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: GestureDetector(
-              onTap: () => prov.setSub(sub['id'] as String),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-                decoration: BoxDecoration(
-                  gradient: isOn
-                      ? LinearGradient(colors: [
-                          AppTheme.accent.withValues(alpha: 0.18),
-                          AppTheme.accent.withValues(alpha: 0.06),
-                        ])
-                      : null,
-                  color: isOn ? null : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isOn
-                        ? AppTheme.accent.withValues(alpha: 0.5)
-                        : (isDark ? const Color(0xFF1F2937) : const Color(0xFFE5E7EB)),
-                    width: isOn ? 1.5 : 1,
-                  ),
-                  boxShadow: isOn
-                      ? [BoxShadow(color: AppTheme.accent.withValues(alpha: 0.12), blurRadius: 8, offset: const Offset(0, 2))]
-                      : null,
-                ),
-                child: Text(
-                  '${prov.localizedField(sub, 'label')} ($cnt)',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: isOn ? FontWeight.w800 : FontWeight.w500,
-                    color: isOn
-                        ? AppTheme.accent
-                        : (isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF)),
-                  ),
-                ),
-              ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Center(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF161B22) : const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(16),
             ),
-          );
-        }).toList(),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: subs.map((sub) {
+                final subId = sub['id'] as String;
+                final isOn = prov.currentSub == subId || (prov.currentSub.isEmpty && subId.contains('_all'));
+                final cnt = prov.subTabCount(subId);
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  child: GestureDetector(
+                    onTap: () => prov.setSub(subId),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isOn ? (isDark ? const Color(0xFF262D3D) : Colors.white) : Colors.transparent,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: isOn
+                            ? [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ]
+                            : [],
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            prov.localizedField(sub, 'label'),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: isOn ? FontWeight.w700 : FontWeight.w600,
+                              color: isOn
+                                  ? AppTheme.primary
+                                  : (isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
+                            ),
+                          ),
+                          if (cnt > 0) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: isOn
+                                    ? AppTheme.primary.withValues(alpha: 0.1)
+                                    : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                '$cnt',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: isOn
+                                      ? AppTheme.primary
+                                      : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
       ),
     );
   }

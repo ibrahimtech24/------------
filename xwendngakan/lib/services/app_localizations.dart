@@ -140,12 +140,12 @@ class S {
       'en': 'Apply',
     },
 
-    'greeting': {
+  
+'greeting': {
       'ku': 'سڵاو',
       'ar': 'مرحباً',
       'en': 'Hello',
-    },
-    'greetingSubtitle': {
+    },    'greetingSubtitle': {
       'ku': 'خوێندنگای دڵخوازت بدۆزەوە',
       'ar': 'ابحث عن مؤسستك المفضلة',
       'en': 'Find your favorite institution',

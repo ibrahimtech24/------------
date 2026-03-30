@@ -95,13 +95,13 @@ class _HomeScreenState extends State<HomeScreen>
                     SliverToBoxAdapter(child: HomeEmptyState(prov: prov, isDark: isDark, searchController: _searchController))
                   else
                     SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 100),
+                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 120),
                       sliver: SliverGrid(
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: screenW > 600 ? 3 : 2,
-                          mainAxisSpacing: 6,
-                          crossAxisSpacing: 6,
-                          childAspectRatio: 1.2,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          childAspectRatio: 0.82,
                         ),
                         delegate: SliverChildBuilderDelegate(
                           (context, i) {

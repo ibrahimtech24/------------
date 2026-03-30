@@ -35,40 +35,40 @@ class QuickCategories extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(24, 20, 24, 10),
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 16),
           child: Row(
             children: [
               Container(
                 width: 4,
-                height: 20,
+                height: 22,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [AppTheme.accent, AppTheme.primary],
                   ),
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(4),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Text(
                 S.of(context, 'categories'),
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 20,
                   fontWeight: FontWeight.w800,
                   color: isDark ? Colors.white : const Color(0xFF0F172A),
-                  letterSpacing: -0.3,
+                  letterSpacing: -0.4,
                 ),
               ),
             ],
           ),
         ),
         SizedBox(
-          height: 38,
+          height: 48, // Taller for modern pill shape
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: tabs.length,
             itemBuilder: (context, i) {
               final tab = tabs[i];
@@ -76,15 +76,16 @@ class QuickCategories extends StatelessWidget {
               final isOn = prov.currentTab == key;
               final label = prov.localizedField(tab, 'label');
               final cleanLabel = label.replaceFirst(RegExp(r'^[^\s]+\s'), '').trim();
-              final colors = typeColors[key] ?? [const Color(0xFF374151), const Color(0xFF6B7280)];
+              final colors = typeColors[key] ?? [AppTheme.primary, AppTheme.accent];
 
               return Padding(
-                padding: const EdgeInsets.only(left: 6),
+                padding: const EdgeInsets.only(left: 8),
                 child: GestureDetector(
                   onTap: () => prov.setTab(key),
                   child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeOutCubic,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
                     decoration: BoxDecoration(
                       gradient: isOn
                           ? LinearGradient(
@@ -93,25 +94,42 @@ class QuickCategories extends StatelessWidget {
                               colors: colors,
                             )
                           : null,
-                      color: isOn ? null : (isDark ? const Color(0xFF161B22) : Colors.white),
-                      borderRadius: BorderRadius.circular(12),
+                      color: isOn ? null : (isDark ? const Color(0xFF1E293B) : Colors.white),
+                      borderRadius: BorderRadius.circular(24),
                       border: isOn
                           ? null
                           : Border.all(
                               color: isDark
-                                  ? const Color(0xFF30363D)
+                                  ? const Color(0xFF334155)
                                   : const Color(0xFFE2E8F0),
+                              width: 1.5,
                             ),
+                      boxShadow: isOn
+                          ? [
+                              BoxShadow(
+                                color: colors.first.withValues(alpha: 0.3),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ]
+                          : [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                     ),
                     child: Center(
                       child: Text(
                         cleanLabel,
                         style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: isOn ? FontWeight.w700 : FontWeight.w500,
+                          fontSize: 14,
+                          fontWeight: isOn ? FontWeight.w800 : FontWeight.w600,
                           color: isOn
                               ? Colors.white
-                              : (isDark ? Colors.white70 : const Color(0xFF475569)),
+                              : (isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569)),
+                          letterSpacing: 0.1,
                         ),
                       ),
                     ),

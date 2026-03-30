@@ -23,47 +23,52 @@ class GreetingHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 20, 20, 4),
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppTheme.primary, AppTheme.accent],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Welcome Text
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      S.of(context, 'appName'),
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w900,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Center(
-              child: Text('📚', style: TextStyle(fontSize: 22)),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              S.of(context, 'appName'),
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: isDark ? Colors.white : const Color(0xFF0F172A),
-                letterSpacing: -0.5,
+              // Actions
+              Row(
+                children: [
+                  _buildHeaderIcon(
+                    icon: isDark ? Iconsax.sun_1 : Iconsax.moon,
+                    onTap: onToggleTheme,
+                    iconColor: isDark ? const Color(0xFFFBBF24) : AppTheme.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  _buildHeaderIcon(
+                    icon: favoritesCount > 0 ? Icons.favorite_rounded : Iconsax.heart,
+                    onTap: onShowFavorites,
+                    iconColor: favoritesCount > 0 ? Colors.redAccent : null,
+                    badge: true,
+                    badgeCount: favoritesCount,
+                  ),
+                ],
               ),
-            ),
+            ],
           ),
-          _buildHeaderIcon(
-            icon: isDark ? Iconsax.sun_1 : Iconsax.moon,
-            onTap: onToggleTheme,
-            iconColor: isDark ? const Color(0xFFFBBF24) : null,
-          ),
-          const SizedBox(width: 4),
-          _buildHeaderIcon(
-            icon: favoritesCount > 0 ? Iconsax.heart5 : Iconsax.heart,
-            onTap: onShowFavorites,
-            iconColor: favoritesCount > 0 ? Colors.redAccent : null,
-          ),
+          const SizedBox(height: 16),
         ],
       ),
     );
@@ -79,47 +84,48 @@ class GreetingHeader extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: SizedBox(
-        width: 52,
-        height: 52,
+        width: 48,
+        height: 48,
         child: Stack(
           alignment: Alignment.center,
           children: [
             Container(
-              width: 44,
-              height: 44,
+              width: 48,
+              height: 48,
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF161B22) : Colors.white,
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: isDark ? const Color(0xFF30363D) : const Color(0xFFE2E8F0),
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
+                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
               child: Icon(
                 icon,
-                size: 20,
-                color: iconColor ?? (isDark ? const Color(0xFF8B949E) : const Color(0xFF64748B)),
+                size: 22,
+                color: iconColor ?? (isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
               ),
             ),
             if (badge && badgeCount != null && badgeCount > 0)
               Positioned(
-                top: 0,
-                right: 0,
+                top: -2,
+                right: -2,
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                  constraints: const BoxConstraints(minWidth: 18),
+                  constraints: const BoxConstraints(minWidth: 20),
                   decoration: BoxDecoration(
                     color: Colors.redAccent,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: isDark ? const Color(0xFF161B22) : Colors.white,
-                      width: 1.5,
+                      color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFF),
+                      width: 2,
                     ),
                   ),
                   child: Text(
@@ -128,7 +134,7 @@ class GreetingHeader extends StatelessWidget {
                       color: Colors.white,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
-                      height: 1,
+                      height: 1.1,
                     ),
                     textAlign: TextAlign.center,
                   ),
