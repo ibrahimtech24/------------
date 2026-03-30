@@ -56,7 +56,7 @@ Route::get('/app-data', function () {
         'success' => true,
         'data' => [
             'types' => $types,
-        ],
+        ], 
     ]);
 });
 
@@ -88,8 +88,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/institutions/{institutionId}/posts', [PostController::class, 'store']);
     Route::put('/posts/{id}', [PostController::class, 'update']);
     Route::delete('/posts/{id}', [PostController::class, 'destroy']);
-
+    
     // Admin: Post management
     Route::get('/admin/posts', [PostController::class, 'adminIndex']);
     Route::post('/admin/posts/{id}/toggle-approval', [PostController::class, 'toggleApproval']);
 });
+  

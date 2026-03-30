@@ -3,9 +3,8 @@ import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
 import 'language_screen.dart';
-import 'login_screen.dart';
-import 'main_nav_screen.dart';
 import 'onboarding_screen.dart';
+import 'section_selection_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -104,10 +103,8 @@ class _SplashScreenState extends State<SplashScreen>
       destination = const OnboardingScreen();
     } else if (!prov.hasSelectedLanguage) {
       destination = const LanguageScreen();
-    } else if (prov.isLoggedIn) {
-      destination = const MainNavScreen();
     } else {
-      destination = const LoginScreen();
+      destination = const SectionSelectionScreen();
     }
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
