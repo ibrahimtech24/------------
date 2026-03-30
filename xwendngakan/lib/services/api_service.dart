@@ -1,0 +1,562 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/institution.dart';
+import '../models/post.dart';
+
+class ApiService {
+  // ── Configuration ──
+  // بۆ گۆڕینی سێرڤەر: تەنها ئەم دوو هێڵە بگۆڕە
+  static const String _host = '127.0.0.1';
+  static const int _port = 8000;
+  static const bool _useHttps = false;
+
+  static const Duration _timeout = Duration(seconds: 15);
+
+  static String get baseUrl {
+    final scheme = _useHttps ? 'https' : 'http';
+    return '$scheme://$_host:$_port/api';
+  }
+
+  static String get serverBase {
+    final scheme = _useHttps ? 'https' : 'http';
+    return '$scheme://$_host:$_port';
+  }
+
+  static String? _token;
+
+  // ── Token Management ──
+
+  static Future<void> loadToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    _token = prefs.getString('auth_token');
+  }
+
+  static Future<void> saveToken(String token) async {
+    _token = token;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('auth_token', token);
+  }
+
+  static Future<void> clearToken() async {
+    _token = null;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('auth_token');
+  }
+
+  static bool get isLoggedIn => _token != null;
+
+  static Map<String, String> get _headers => {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        if (_token != null) 'Authorization': 'Bearer $_token',
+      };
+
+  // ── Auth ──
+
+  static Future<Map<String, dynamic>> register({
+    required String name,
+    required String email,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/register'),
+      headers: _headers,
+      body: jsonEncode({
+        'name': name,
+        'email': email,
+        'password': password,
+        'password_confirmation': passwordConfirmation,
+      }),
+    ).timeout(_timeout);
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 201 && data['success'] == true) {
+      await saveToken(data['data']['token']);
+    }
+    return data;
+  }
+
+  static Future<Map<String, dynamic>> login({
+    required String email,
+    required String password,
+  }) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/login'),
+      headers: _headers,
+      body: jsonEncode({
+        'email': email,
+        'password': password,
+      }),
+    ).timeout(_timeout);
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 && data['success'] == true) {
+      await saveToken(data['data']['token']);
+    }
+    return data;
+  }
+
+  static Future<void> logout() async {
+    try {
+      await http.post(
+        Uri.parse('$baseUrl/logout'),
+        headers: _headers,
+      );
+    } catch (_) {}
+    await clearToken();
+  }
+
+  static Future<Map<String, dynamic>?> getUser() async {
+    if (_token == null) return null;
+    try {
+      final res = await http.get(
+        Uri.parse('$baseUrl/user'),
+        headers: _headers,
+      ).timeout(_timeout);
+      if (res.statusCode == 200) {
+        return jsonDecode(res.body)['data'];
+      }
+      // Token expired or invalid
+      if (res.statusCode == 401) {
+        await clearToken();
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  // ── Institutions ──
+
+  static Future<List<Institution>> getInstitutions({
+    String? type,
+    String? city,
+    String? search,
+    String sort = 'newest',
+  }) async {
+    final params = <String, String>{};
+    if (type != null && type.isNotEmpty) params['type'] = type;
+    if (city != null && city.isNotEmpty) params['city'] = city;
+    if (search != null && search.isNotEmpty) params['search'] = search;
+    params['sort'] = sort;
+
+    final uri = Uri.parse('$baseUrl/institutions').replace(queryParameters: params);
+    final res = await http.get(uri, headers: _headers).timeout(_timeout);
+
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body);
+      final List items = data['data'];
+      return items.map((j) => Institution.fromJson(j)).toList();
+    }
+    return [];
+  }
+
+  static Future<Institution?> getInstitution(int id) async {
+    final res = await http.get(
+      Uri.parse('$baseUrl/institutions/$id'),
+      headers: _headers,
+    ).timeout(_timeout);
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body);
+      return Institution.fromJson(data['data']);
+    }
+    return null;
+  }
+
+  static Future<Map<String, dynamic>> createInstitution(
+    Institution inst, {
+    File? logoFile,
+  }) async {
+    final uri = Uri.parse('$baseUrl/institutions');
+    final request = http.MultipartRequest('POST', uri);
+
+    // Add auth header
+    if (_token != null) {
+      request.headers['Authorization'] = 'Bearer $_token';
+    }
+    request.headers['Accept'] = 'application/json';
+
+    // Add all text fields
+    final json = inst.toJson();
+    json.remove('logo'); // Don't send local path
+    json.forEach((key, value) {
+      request.fields[key] = value?.toString() ?? '';
+    });
+
+    // Add logo file if provided
+    if (logoFile != null && await logoFile.exists()) {
+      request.files.add(
+        await http.MultipartFile.fromPath('logo', logoFile.path),
+      );
+    }
+
+    final streamedRes = await request.send().timeout(const Duration(seconds: 30));
+    final resBody = await streamedRes.stream.bytesToString();
+    return jsonDecode(resBody);
+  }
+
+  static Future<Map<String, dynamic>> updateInstitution(Institution inst) async {
+    final res = await http.put(
+      Uri.parse('$baseUrl/institutions/${inst.id}'),
+      headers: _headers,
+      body: jsonEncode(inst.toJson()),
+    ).timeout(_timeout);
+    return jsonDecode(res.body);
+  }
+
+  static Future<bool> deleteInstitution(int id) async {
+    final res = await http.delete(
+      Uri.parse('$baseUrl/institutions/$id'),
+      headers: _headers,
+    ).timeout(_timeout);
+    return res.statusCode == 200;
+  }
+
+  static Future<Map<String, dynamic>> getStats() async {
+    final res = await http.get(
+      Uri.parse('$baseUrl/stats'),
+      headers: _headers,
+    ).timeout(_timeout);
+    if (res.statusCode == 200) {
+      return jsonDecode(res.body)['data'];
+    }
+    return {};
+  }
+
+  static Future<List<Map<String, dynamic>>> getCategories() async {
+    // Deprecated — use getAppData() instead
+    return [];
+  }
+
+  static Future<List<Map<String, dynamic>>> getInstitutionTypes() async {
+    // Deprecated — use getAppData() instead
+    return [];
+  }
+
+  /// Unified endpoint: returns { types: [...] }
+  static Future<Map<String, List<Map<String, dynamic>>>> getAppData() async {
+    try {
+      final res = await http.get(
+        Uri.parse('$baseUrl/app-data'),
+        headers: _headers,
+      ).timeout(_timeout);
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body)['data'] as Map<String, dynamic>;
+        final List types = data['types'] ?? [];
+        return {
+          'types': types.map((t) => Map<String, dynamic>.from(t)).toList(),
+        };
+      }
+    } catch (_) {}
+    return {'types': []};
+  }
+
+  // ── Pagination Support ──
+
+  static Future<Map<String, dynamic>> getInstitutionsPaginated({
+    String? type,
+    String? city,
+    String? search,
+    String sort = 'newest',
+    int page = 1,
+    int perPage = 20,
+  }) async {
+    final params = <String, String>{
+      'page': page.toString(),
+      'per_page': perPage.toString(),
+    };
+    if (type != null && type.isNotEmpty) params['type'] = type;
+    if (city != null && city.isNotEmpty) params['city'] = city;
+    if (search != null && search.isNotEmpty) params['search'] = search;
+    params['sort'] = sort;
+
+    final uri = Uri.parse('$baseUrl/institutions').replace(queryParameters: params);
+    final res = await http.get(uri, headers: _headers).timeout(_timeout);
+
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body);
+      final List items = data['data'];
+      return {
+        'institutions': items.map((j) => Institution.fromJson(j)).toList(),
+        'meta': data['meta'],
+      };
+    }
+    return {'institutions': [], 'meta': null};
+  }
+
+  // ── Favorites ──
+
+  static Future<List<Institution>> getFavorites() async {
+    if (_token == null) return [];
+    try {
+      final res = await http.get(
+        Uri.parse('$baseUrl/favorites'),
+        headers: _headers,
+      ).timeout(_timeout);
+      if (res.statusCode == 200) {
+        final List items = jsonDecode(res.body)['data'];
+        return items.map((j) => Institution.fromJson(j)).toList();
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  static Future<List<int>> getFavoriteIds() async {
+    if (_token == null) return [];
+    try {
+      final res = await http.get(
+        Uri.parse('$baseUrl/favorites/ids'),
+        headers: _headers,
+      ).timeout(_timeout);
+      if (res.statusCode == 200) {
+        final List ids = jsonDecode(res.body)['data'];
+        return ids.map((id) => id as int).toList();
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  static Future<Map<String, dynamic>> toggleFavorite(int institutionId) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/favorites/$institutionId/toggle'),
+      headers: _headers,
+    ).timeout(_timeout);
+    return jsonDecode(res.body);
+  }
+
+  static Future<bool> addFavorite(int institutionId) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/favorites/$institutionId'),
+      headers: _headers,
+    ).timeout(_timeout);
+    return res.statusCode == 201;
+  }
+
+  static Future<bool> removeFavorite(int institutionId) async {
+    final res = await http.delete(
+      Uri.parse('$baseUrl/favorites/$institutionId'),
+      headers: _headers,
+    ).timeout(_timeout);
+    return res.statusCode == 200;
+  }
+
+  // ── Password Reset ──
+
+  static Future<Map<String, dynamic>> forgotPassword(String email) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/forgot-password'),
+      headers: _headers,
+      body: jsonEncode({'email': email}),
+    ).timeout(_timeout);
+    return jsonDecode(res.body);
+  }
+
+  static Future<Map<String, dynamic>> verifyResetCode(String email, String code) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/verify-reset-code'),
+      headers: _headers,
+      body: jsonEncode({'email': email, 'code': code}),
+    ).timeout(_timeout);
+    return jsonDecode(res.body);
+  }
+
+  static Future<Map<String, dynamic>> resetPassword({
+    required String email,
+    required String resetToken,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/reset-password'),
+      headers: _headers,
+      body: jsonEncode({
+        'email': email,
+        'reset_token': resetToken,
+        'password': password,
+        'password_confirmation': passwordConfirmation,
+      }),
+    ).timeout(_timeout);
+    final data = jsonDecode(res.body);
+    if (res.statusCode == 200 && data['success'] == true) {
+      await saveToken(data['data']['token']);
+    }
+    return data;
+  }
+
+  // ── Reports ──
+
+  static Future<List<Map<String, dynamic>>> getReportTypes() async {
+    try {
+      final res = await http.get(
+        Uri.parse('$baseUrl/report-types'),
+        headers: _headers,
+      ).timeout(_timeout);
+      if (res.statusCode == 200) {
+        final List types = jsonDecode(res.body)['data'];
+        return types.map((t) => Map<String, dynamic>.from(t)).toList();
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  static Future<Map<String, dynamic>> reportInstitution({
+    required int institutionId,
+    required String type,
+    String? description,
+  }) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/institutions/$institutionId/report'),
+      headers: _headers,
+      body: jsonEncode({
+        'type': type,
+        'description': description,
+      }),
+    ).timeout(_timeout);
+    return jsonDecode(res.body);
+  }
+
+  // ── App Version / Force Update ──
+
+  static Future<Map<String, dynamic>> checkUpdate({
+    required String platform,
+    required int buildNumber,
+  }) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$baseUrl/check-update'),
+        headers: _headers,
+        body: jsonEncode({
+          'platform': platform,
+          'build': buildNumber,
+        }),
+      ).timeout(_timeout);
+      if (res.statusCode == 200) {
+        return jsonDecode(res.body)['data'];
+      }
+    } catch (_) {}
+    return {'update_available': false, 'force_update': false};
+  }
+
+  // ── FCM Token ──
+
+  static Future<bool> updateFcmToken(String fcmToken) async {
+    if (_token == null) return false;
+    try {
+      final res = await http.post(
+        Uri.parse('$baseUrl/fcm-token'),
+        headers: _headers,
+        body: jsonEncode({'fcm_token': fcmToken}),
+      ).timeout(_timeout);
+      return res.statusCode == 200;
+    } catch (_) {}
+    return false;
+  }
+
+  static Future<Map<String, dynamic>> toggleNotifications() async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/toggle-notifications'),
+      headers: _headers,
+    ).timeout(_timeout);
+    return jsonDecode(res.body);
+  }
+
+  // ── Posts ──
+
+  /// Get posts for a specific institution
+  static Future<List<Post>> getInstitutionPosts(int institutionId) async {
+    try {
+      final res = await http.get(
+        Uri.parse('$baseUrl/institutions/$institutionId/posts'),
+        headers: _headers,
+      ).timeout(_timeout);
+      if (res.statusCode == 200) {
+        final List items = jsonDecode(res.body)['data'] ?? [];
+        return items.map((j) => Post.fromJson(j)).toList();
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  /// Create a post for an institution
+  static Future<Map<String, dynamic>> createPost({
+    required int institutionId,
+    required String title,
+    required String content,
+    File? imageFile,
+  }) async {
+    final uri = Uri.parse('$baseUrl/institutions/$institutionId/posts');
+    final request = http.MultipartRequest('POST', uri);
+
+    if (_token != null) {
+      request.headers['Authorization'] = 'Bearer $_token';
+    }
+    request.headers['Accept'] = 'application/json';
+
+    request.fields['title'] = title;
+    request.fields['content'] = content;
+
+    if (imageFile != null && await imageFile.exists()) {
+      request.files.add(
+        await http.MultipartFile.fromPath('image', imageFile.path),
+      );
+    }
+
+    final streamedRes = await request.send().timeout(const Duration(seconds: 30));
+    final resBody = await streamedRes.stream.bytesToString();
+    return jsonDecode(resBody);
+  }
+
+  /// Update a post
+  static Future<Map<String, dynamic>> updatePost({
+    required int postId,
+    required String title,
+    required String content,
+  }) async {
+    final res = await http.put(
+      Uri.parse('$baseUrl/posts/$postId'),
+      headers: _headers,
+      body: jsonEncode({
+        'title': title,
+        'content': content,
+      }),
+    ).timeout(_timeout);
+    return jsonDecode(res.body);
+  }
+
+  /// Delete a post
+  static Future<bool> deletePost(int postId) async {
+    final res = await http.delete(
+      Uri.parse('$baseUrl/posts/$postId'),
+      headers: _headers,
+    ).timeout(_timeout);
+    return res.statusCode == 200;
+  }
+
+  // ── Admin Posts ──
+
+  /// Get all posts (admin)
+  static Future<List<Post>> getAllPosts({bool? approved}) async {
+    try {
+      final params = <String, String>{};
+      if (approved != null) params['approved'] = approved ? '1' : '0';
+
+      final uri = Uri.parse('$baseUrl/admin/posts').replace(queryParameters: params.isNotEmpty ? params : null);
+      final res = await http.get(uri, headers: _headers).timeout(_timeout);
+      if (res.statusCode == 200) {
+        final List items = jsonDecode(res.body)['data'] ?? [];
+        return items.map((j) => Post.fromJson(j)).toList();
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  /// Approve/reject a post (admin)
+  static Future<Map<String, dynamic>> togglePostApproval(int postId) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/admin/posts/$postId/toggle-approval'),
+      headers: _headers,
+    ).timeout(_timeout);
+    return jsonDecode(res.body);
+  }
+}
+

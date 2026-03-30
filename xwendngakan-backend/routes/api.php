@@ -1,0 +1,95 @@
+<?php
+
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\InstitutionController;
+use App\Http\Controllers\Api\FavoriteController;
+use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\AppVersionController;
+use App\Http\Controllers\Api\PostController;
+use App\Models\InstitutionType;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Public Routes
+|--------------------------------------------------------------------------
+*/
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+// Password Reset (public)
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/verify-reset-code', [AuthController::class, 'verifyResetCode']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+
+// App version check (public)
+Route::post('/check-update', [AppVersionController::class, 'check']);
+
+// Public institution browsing
+Route::get('/institutions', [InstitutionController::class, 'index']);
+Route::get('/institutions/{id}', [InstitutionController::class, 'show']);
+Route::get('/stats', [InstitutionController::class, 'stats']);
+
+// Report types (public)
+Route::get('/report-types', [ReportController::class, 'types']);
+
+// Report institution (can be anonymous)
+Route::post('/institutions/{id}/report', [ReportController::class, 'store']);
+
+// Public posts for an institution
+Route::get('/institutions/{institutionId}/posts', [PostController::class, 'index']);
+
+// Institution types
+Route::get('/institution-types', function () {
+    $types = InstitutionType::active()->ordered()->get(['key', 'name', 'name_en', 'name_ar', 'emoji', 'icon']);
+    return response()->json([
+        'success' => true,
+        'data' => $types,
+    ]);
+});
+
+// Unified app data — single endpoint for types + categories
+Route::get('/app-data', function () {
+    $types = InstitutionType::active()->ordered()->get(['key', 'name', 'name_en', 'name_ar', 'emoji', 'icon']);
+
+    return response()->json([
+        'success' => true,
+        'data' => [
+            'types' => $types,
+        ],
+    ]);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Protected Routes (require Sanctum token)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth:sanctum')->group(function () {
+    // Auth
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', [AuthController::class, 'user']);
+    Route::post('/fcm-token', [AuthController::class, 'updateFcmToken']);
+    Route::post('/toggle-notifications', [AuthController::class, 'toggleNotifications']);
+
+    // Institution CRUD
+    Route::post('/institutions', [InstitutionController::class, 'store']);
+    Route::put('/institutions/{id}', [InstitutionController::class, 'update']);
+    Route::delete('/institutions/{id}', [InstitutionController::class, 'destroy']);
+
+    // Favorites
+    Route::get('/favorites', [FavoriteController::class, 'index']);
+    Route::get('/favorites/ids', [FavoriteController::class, 'ids']);
+    Route::post('/favorites/{institutionId}', [FavoriteController::class, 'store']);
+    Route::delete('/favorites/{institutionId}', [FavoriteController::class, 'destroy']);
+    Route::post('/favorites/{institutionId}/toggle', [FavoriteController::class, 'toggle']);
+
+    // Posts CRUD
+    Route::post('/institutions/{institutionId}/posts', [PostController::class, 'store']);
+    Route::put('/posts/{id}', [PostController::class, 'update']);
+    Route::delete('/posts/{id}', [PostController::class, 'destroy']);
+
+    // Admin: Post management
+    Route::get('/admin/posts', [PostController::class, 'adminIndex']);
+    Route::post('/admin/posts/{id}/toggle-approval', [PostController::class, 'toggleApproval']);
+});

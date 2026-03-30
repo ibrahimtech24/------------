@@ -1,0 +1,271 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+
+class AuthController extends Controller
+{
+    /**
+     * Register a new user.
+     */
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $user = User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'ئەکاونتەکەت بە سەرکەوتوویی دروست کرا!',
+            'data'    => [
+                'user'  => $user,
+                'token' => $token,
+            ],
+        ], 201);
+    }
+
+    /**
+     * Login user.
+     */
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => ['ئیمەیڵ یان وشەی نهێنی هەڵەیە.'],
+            ]);
+        }
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'بە سەرکەوتوویی چوویتە ژوورەوە!',
+            'data'    => [
+                'user'  => $user,
+                'token' => $token,
+            ],
+        ]);
+    }
+
+    /**
+     * Logout user.
+     */
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'بە سەرکەوتوویی چوویتە دەرەوە.',
+        ]);
+    }
+
+    /**
+     * Get current user.
+     */
+    public function user(Request $request)
+    {
+        return response()->json([
+            'success' => true,
+            'data'    => $request->user(),
+        ]);
+    }
+
+    /**
+     * Send password reset code.
+     */
+    public function forgotPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        // Generate a 6-digit code
+        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        // Store the code (expires in 15 minutes)
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $request->email],
+            [
+                'token'      => Hash::make($code),
+                'created_at' => now(),
+            ]
+        );
+
+        // Send email with the code
+        try {
+            Mail::raw("کۆدی گۆڕینی وشەی نهێنی: $code\n\nئەم کۆدە لە ماوەی ١٥ خولەکدا بەسەردەچێت.", function ($message) use ($request) {
+                $message->to($request->email)
+                    ->subject('کۆدی گۆڕینی وشەی نهێنی - خوێندنگاکانم');
+            });
+        } catch (\Exception $e) {
+            // Log the error but don't expose it to the user
+            \Log::error('Failed to send password reset email: ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'کۆدی گۆڕینی وشەی نهێنی نێردرا بۆ ئیمەیڵەکەت.',
+        ]);
+    }
+
+    /**
+     * Verify reset code.
+     */
+    public function verifyResetCode(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'code'  => 'required|string|size:6',
+        ]);
+
+        $record = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->first();
+
+        if (!$record) {
+            throw ValidationException::withMessages([
+                'code' => ['هیچ داواکارییەکی گۆڕینی وشەی نهێنی نەدۆزرایەوە.'],
+            ]);
+        }
+
+        // Check if code is expired (15 minutes)
+        if (now()->diffInMinutes($record->created_at) > 15) {
+            throw ValidationException::withMessages([
+                'code' => ['کۆدەکە بەسەرچووە. تکایە کۆدی نوێ داوا بکە.'],
+            ]);
+        }
+
+        if (!Hash::check($request->code, $record->token)) {
+            throw ValidationException::withMessages([
+                'code' => ['کۆدەکە هەڵەیە.'],
+            ]);
+        }
+
+        // Generate a temporary token for the reset
+        $resetToken = Str::random(60);
+        DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->update(['token' => Hash::make($resetToken)]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'کۆدەکە دروستە.',
+            'data'    => [
+                'reset_token' => $resetToken,
+            ],
+        ]);
+    }
+
+    /**
+     * Reset password with token.
+     */
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email'       => 'required|email|exists:users,email',
+            'reset_token' => 'required|string',
+            'password'    => 'required|string|min:6|confirmed',
+        ]);
+
+        $record = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->first();
+
+        if (!$record || !Hash::check($request->reset_token, $record->token)) {
+            throw ValidationException::withMessages([
+                'reset_token' => ['تۆکنەکە نادروستە یان بەسەرچووە.'],
+            ]);
+        }
+
+        // Update password
+        $user = User::where('email', $request->email)->first();
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        // Delete the reset token
+        DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->delete();
+
+        // Revoke all tokens for security
+        $user->tokens()->delete();
+
+        // Create new token
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'وشەی نهێنی بە سەرکەوتوویی گۆڕدرا!',
+            'data'    => [
+                'user'  => $user,
+                'token' => $token,
+            ],
+        ]);
+    }
+
+    /**
+     * Update FCM token for push notifications.
+     */
+    public function updateFcmToken(Request $request)
+    {
+        $request->validate([
+            'fcm_token' => 'required|string',
+        ]);
+
+        $request->user()->update([
+            'fcm_token' => $request->fcm_token,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تۆکنی ئاگادارکردنەوە نوێکرایەوە.',
+        ]);
+    }
+
+    /**
+     * Toggle notifications.
+     */
+    public function toggleNotifications(Request $request)
+    {
+        $user = $request->user();
+        $user->notifications_enabled = !$user->notifications_enabled;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => $user->notifications_enabled
+                ? 'ئاگادارکردنەوەکان چالاک کرا.'
+                : 'ئاگادارکردنەوەکان ناچالاک کرا.',
+            'data'    => [
+                'notifications_enabled' => $user->notifications_enabled,
+            ],
+        ]);
+    }
+}
