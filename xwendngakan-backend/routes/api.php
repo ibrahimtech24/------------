@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\AppVersionController;
 use App\Http\Controllers\Api\PostController;
+use App\Http\Controllers\Api\CvController;
 use App\Models\InstitutionType;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +39,13 @@ Route::post('/institutions/{id}/report', [ReportController::class, 'store']);
 
 // Public posts for an institution
 Route::get('/institutions/{institutionId}/posts', [PostController::class, 'index']);
+
+// CV Routes (public)
+Route::get('/cvs', [CvController::class, 'index']);
+Route::post('/cvs', [CvController::class, 'store']);
+Route::get('/cvs/{id}', [CvController::class, 'show']);
+Route::get('/cv-stats', [CvController::class, 'stats']);
+Route::get('/education-levels', [CvController::class, 'educationLevels']);
 
 // Institution types
 Route::get('/institution-types', function () {

@@ -558,5 +558,137 @@ class ApiService {
     ).timeout(_timeout);
     return jsonDecode(res.body);
   }
+
+  // ── CV ──
+
+  /// Submit a CV
+  static Future<Map<String, dynamic>> submitCv({
+    required String name,
+    required String phone,
+    String? email,
+    required String city,
+    int? age,
+    String? gender,
+    String? graduationYear,
+    required String field,
+    String? educationLevel,
+    String? experience,
+    String? skills,
+    String? notes,
+    File? photo,
+  }) async {
+    final uri = Uri.parse('$baseUrl/cvs');
+    final request = http.MultipartRequest('POST', uri);
+
+    request.headers['Accept'] = 'application/json';
+
+    // Map gender values from Kurdish to English
+    String? mappedGender;
+    if (gender != null) {
+      switch (gender) {
+        case 'نێر':
+          mappedGender = 'male';
+          break;
+        case 'مێ':
+          mappedGender = 'female';
+          break;
+        case 'تر':
+          mappedGender = 'other';
+          break;
+      }
+    }
+
+    // Add all fields
+    request.fields['name'] = name;
+    request.fields['phone'] = phone;
+    if (email != null && email.isNotEmpty) request.fields['email'] = email;
+    request.fields['city'] = city;
+    if (age != null) request.fields['age'] = age.toString();
+    if (mappedGender != null) request.fields['gender'] = mappedGender;
+    if (graduationYear != null && graduationYear.isNotEmpty) {
+      request.fields['graduation_year'] = graduationYear;
+    }
+    request.fields['field'] = field;
+    if (educationLevel != null && educationLevel.isNotEmpty) {
+      request.fields['education_level'] = educationLevel;
+    }
+    if (experience != null && experience.isNotEmpty) {
+      request.fields['experience'] = experience;
+    }
+    if (skills != null && skills.isNotEmpty) request.fields['skills'] = skills;
+    if (notes != null && notes.isNotEmpty) request.fields['notes'] = notes;
+
+    // Add photo if provided
+    if (photo != null && await photo.exists()) {
+      request.files.add(
+        await http.MultipartFile.fromPath('photo', photo.path),
+      );
+    }
+
+    try {
+      final streamedRes = await request.send().timeout(const Duration(seconds: 30));
+      final resBody = await streamedRes.stream.bytesToString();
+      return jsonDecode(resBody);
+    } catch (e) {
+      return {'success': false, 'message': 'هەڵەیەک ڕوویدا: $e'};
+    }
+  }
+
+  /// Get all CVs with optional filters
+  static Future<List<Map<String, dynamic>>> getCvs({
+    String? city,
+    String? field,
+    String? educationLevel,
+    String? search,
+  }) async {
+    try {
+      final params = <String, String>{};
+      if (city != null && city.isNotEmpty) params['city'] = city;
+      if (field != null && field.isNotEmpty) params['field'] = field;
+      if (educationLevel != null && educationLevel.isNotEmpty) {
+        params['education_level'] = educationLevel;
+      }
+      if (search != null && search.isNotEmpty) params['search'] = search;
+
+      final uri = Uri.parse('$baseUrl/cvs').replace(
+        queryParameters: params.isNotEmpty ? params : null,
+      );
+      final res = await http.get(uri, headers: _headers).timeout(_timeout);
+
+      if (res.statusCode == 200) {
+        final List items = jsonDecode(res.body)['data'] ?? [];
+        return items.map((e) => Map<String, dynamic>.from(e)).toList();
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  /// Get CV details
+  static Future<Map<String, dynamic>?> getCv(int id) async {
+    try {
+      final res = await http.get(
+        Uri.parse('$baseUrl/cvs/$id'),
+        headers: _headers,
+      ).timeout(_timeout);
+      if (res.statusCode == 200) {
+        return jsonDecode(res.body)['data'];
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  /// Get CV stats
+  static Future<Map<String, dynamic>> getCvStats() async {
+    try {
+      final res = await http.get(
+        Uri.parse('$baseUrl/cv-stats'),
+        headers: _headers,
+      ).timeout(_timeout);
+      if (res.statusCode == 200) {
+        return jsonDecode(res.body)['data'];
+      }
+    } catch (_) {}
+    return {};
+  }
 }
 
