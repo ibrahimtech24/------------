@@ -110,7 +110,7 @@ class GreetingHeader extends StatelessWidget {
               child: Icon(
                 icon,
                 size: 22,
-                color: iconColor ?? (isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
+                color: iconColor ?? (isDark ? const Color(0xFFE2E8F0) : const Color(0xFF475569)),
               ),
             ),
             if (badge && badgeCount != null && badgeCount > 0)

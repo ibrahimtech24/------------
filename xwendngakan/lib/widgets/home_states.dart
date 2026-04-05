@@ -35,7 +35,7 @@ class HomeEmptyState extends StatelessWidget {
               child: Icon(
                 Iconsax.search_status_1,
                 size: 52,
-                color: isDark ? const Color(0xFF484F58) : const Color(0xFFCBD5E1),
+                color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFFCBD5E1),
               ),
             ),
             const SizedBox(height: 28),
@@ -44,7 +44,7 @@ class HomeEmptyState extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
-                color: isDark ? const Color(0xFF8B949E) : const Color(0xFF64748B),
+                color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF64748B),
               ),
             ),
             const SizedBox(height: 8),
@@ -52,7 +52,7 @@ class HomeEmptyState extends StatelessWidget {
               S.of(context, 'changeFilters'),
               style: TextStyle(
                 fontSize: 13,
-                color: isDark ? const Color(0xFF484F58) : const Color(0xFF94A3B8),
+                color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF94A3B8),
               ),
             ),
             const SizedBox(height: 28),
@@ -128,7 +128,7 @@ class HomeErrorState extends StatelessWidget {
               child: Icon(
                 Iconsax.wifi_square,
                 size: 52,
-                color: isDark ? const Color(0xFF484F58) : const Color(0xFFCBD5E1),
+                color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFFCBD5E1),
               ),
             ),
             const SizedBox(height: 28),
@@ -137,7 +137,7 @@ class HomeErrorState extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
-                color: isDark ? const Color(0xFF8B949E) : const Color(0xFF64748B),
+                color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF64748B),
               ),
             ),
             const SizedBox(height: 8),
@@ -145,7 +145,7 @@ class HomeErrorState extends StatelessWidget {
               S.of(context, 'connectionError'),
               style: TextStyle(
                 fontSize: 13,
-                color: isDark ? const Color(0xFF484F58) : const Color(0xFF94A3B8),
+                color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF94A3B8),
               ),
             ),
             const SizedBox(height: 28),

@@ -117,10 +117,9 @@ class _SectionSelectionScreenState extends State<SectionSelectionScreen>
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Added space to bring elements down
-                    const SizedBox(height: 60), 
+                    const SizedBox(height: 40),
                     AnimatedBuilder(
                       animation: _animationController,
                       builder: (context, child) {
@@ -129,23 +128,49 @@ class _SectionSelectionScreenState extends State<SectionSelectionScreen>
                           child: Transform.translate(
                             offset: Offset(0, _slideAnimations[0].value),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
+                                // App icon
+                                Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [AppTheme.primary, Color(0xFF60A5FA)],
+                                    ),
+                                    borderRadius: BorderRadius.circular(26),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppTheme.primary.withValues(alpha: 0.3),
+                                        blurRadius: 24,
+                                        offset: const Offset(0, 10),
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.school_rounded,
+                                    color: Colors.white,
+                                    size: 40,
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
                                 const Text(
-                                  'بەخێربێیت!',
+                                  'خوێندنگاکانم',
                                   style: TextStyle(
-                                    fontSize: 34,
+                                    fontSize: 30,
                                     fontWeight: FontWeight.w900,
                                     color: AppTheme.navy,
-                                    letterSpacing: 1.0,
+                                    letterSpacing: 0.5,
                                   ),
                                 ),
                                 const SizedBox(height: 10),
-                                Text(
-                                  'تکایە ئەو بەشە هەڵبژێرە کە دەتەوێت سەردانی بکەیت',
+                                const Text(
+                                  'کوجی بەشەکەت هەڵبژێرە',
                                   style: TextStyle(
                                     fontSize: 15,
-                                    color: const Color(0xFF64748B), // Slate 500
+                                    color: Color(0xFF64748B),
                                     height: 1.5,
                                   ),
                                 ),
@@ -163,11 +188,11 @@ class _SectionSelectionScreenState extends State<SectionSelectionScreen>
                           _buildAnimatedCard(
                             index: 1,
                             title: 'دامەزراوە پەروەردەییەکان',
-                            subtitle: 'قوتابخانە، پەیمانگا و زانکۆکان لێرە بدۆزەرەوە',
+                            subtitle: 'زانکۆ، پەیمانگا و قوتابخانە — هەموو لەک یەک شوێن',
                             icon: Icons.account_balance_rounded,
                             color1: AppTheme.primary,
                             color2: const Color(0xFF60A5FA),
-                            onTap: () {
+                            onTap: () async {
                               final prov = context.read<AppProvider>();
                               if (prov.isLoggedIn) {
                                 Navigator.pushReplacement(
@@ -175,10 +200,16 @@ class _SectionSelectionScreenState extends State<SectionSelectionScreen>
                                   MaterialPageRoute(builder: (_) => const MainNavScreen()),
                                 );
                               } else {
-                                Navigator.push(
+                                await Navigator.push(
                                   context,
                                   MaterialPageRoute(builder: (_) => const LoginScreen()),
                                 );
+                                if (context.mounted && context.read<AppProvider>().isLoggedIn) {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(builder: (_) => const MainNavScreen()),
+                                  );
+                                }
                               }
                             },
                           ),
@@ -186,30 +217,58 @@ class _SectionSelectionScreenState extends State<SectionSelectionScreen>
                           _buildAnimatedCard(
                             index: 2,
                             title: 'بانکی سیڤی',
-                            subtitle: 'دروستکردن و بینینی سیڤییەکان بە ئاسانی',
+                            subtitle: 'سیڤیی حەرفەییت دروستبکە و بھێجبكەوەکان بدۆزەرەوە',
                             icon: Icons.badge_rounded,
                             color1: AppTheme.success,
                             color2: const Color(0xFF34D399),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => const CvBankScreen()),
-                              );
+                            onTap: () async {
+                              final prov = context.read<AppProvider>();
+                              if (prov.isLoggedIn) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const CvBankScreen()),
+                                );
+                              } else {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                                );
+                                if (context.mounted && context.read<AppProvider>().isLoggedIn) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (_) => const CvBankScreen()),
+                                  );
+                                }
+                              }
                             },
                           ),
                           const SizedBox(height: 24),
                           _buildAnimatedCard(
                             index: 3,
                             title: 'مامۆستاکانم',
-                            subtitle: 'دۆزینەوە و پەیوەندیکردنی ڕاستەوخۆ بە مامۆستایان',
+                            subtitle: 'مامۆستاکانت بدۆزەرەوە و بەڕاستێ بیکەوەڌیبکە',
                             icon: Icons.school_rounded,
                             color1: AppTheme.warning,
                             color2: const Color(0xFFFCD34D),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => const TeachersScreen()),
-                              );
+                            onTap: () async {
+                              final prov = context.read<AppProvider>();
+                              if (prov.isLoggedIn) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const TeachersScreen()),
+                                );
+                              } else {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                                );
+                                if (context.mounted && context.read<AppProvider>().isLoggedIn) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (_) => const TeachersScreen()),
+                                  );
+                                }
+                              }
                             },
                           ),
                           const SizedBox(height: 40),
@@ -339,7 +398,7 @@ class _SectionSelectionScreenState extends State<SectionSelectionScreen>
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      Icons.arrow_forward_ios_rounded,
+                      Icons.arrow_back_ios_new_rounded,
                       color: color1,
                       size: 16,
                     ),

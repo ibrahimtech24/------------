@@ -31,6 +31,14 @@ class PostController extends Controller
      */
     public function store(Request $request, int $institutionId)
     {
+        // Only admins can create posts
+        if (!$request->user()->is_admin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'ڕێگەپێدراو نیت بۆ دروستکردنی پۆست.',
+            ], 403);
+        }
+
         $request->validate([
             'title'   => 'nullable|string|max:255',
             'content' => 'nullable|string|max:5000',
@@ -42,7 +50,7 @@ class PostController extends Controller
             'user_id'        => $request->user()->id,
             'title'          => $request->input('title', ''),
             'content'        => $request->input('content', ''),
-            'approved'       => false, // Always pending approval
+            'approved'       => true, // Owner/admin posts are auto-approved
         ];
 
         // Handle image upload

@@ -200,7 +200,7 @@ class _EditScreenState extends State<EditScreen> {
       style: TextStyle(
         fontSize: 11,
         fontWeight: FontWeight.w700,
-        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF555555),
+        color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF555555),
       ),
     );
   }
@@ -277,7 +277,7 @@ class _EditScreenState extends State<EditScreen> {
             S.of(context, 'deleteConfirm'),
             textDirection: Directionality.of(context),
             style: TextStyle(
-              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+              color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF64748B),
             ),
           ),
           actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -291,14 +291,14 @@ class _EditScreenState extends State<EditScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       side: BorderSide(
-                        color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1),
+                        color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFFCBD5E1),
                       ),
                     ),
                     child: Text(
                       S.of(context, 'no'),
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF64748B),
                       ),
                     ),
                   ),

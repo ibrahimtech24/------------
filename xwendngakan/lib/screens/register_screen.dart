@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
@@ -50,7 +48,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _fbC = TextEditingController();
   final _waC = TextEditingController();
 
-  bool _isLocating = false;
   double? _lat;
   double? _lng;
 
@@ -399,7 +396,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     color: isSelected
                         ? Colors.white
                         : (isDark
-                            ? const Color(0xFFCBD5E1)
+                            ? const Color(0xFFF1F5F9)
                             : const Color(0xFF475569)),
                   ),
                 ),
@@ -424,7 +421,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1),
+                  color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFFCBD5E1),
                   width: 2,
                 ),
                 image: _logoFile != null
@@ -436,7 +433,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               child: _logoFile == null
                   ? Icon(Iconsax.camera, size: 32,
-                      color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8))
+                      color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF94A3B8))
                   : null,
             ),
             const SizedBox(height: 8),
@@ -493,7 +490,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               hintStyle: TextStyle(
                 fontSize: 12,
                 color:
-                    isDark ? const Color(0xFF475569) : const Color(0xFFBBBBBB),
+                    isDark ? const Color(0xFFE2E8F0) : const Color(0xFFBBBBBB),
               ),
             ),
           ),
@@ -597,7 +594,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: isDark
-                    ? const Color(0xFFCBD5E1)
+                    ? const Color(0xFFF1F5F9)
                     : const Color(0xFF475569),
               ),
             ),
@@ -619,7 +616,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       style: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w700,
-        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF555555),
+        color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF555555),
       ),
     );
   }
@@ -643,7 +640,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   hintStyle: TextStyle(
                     fontSize: 12,
                     color: isDark
-                        ? const Color(0xFF475569)
+                        ? const Color(0xFFE2E8F0)
                         : const Color(0xFFBBBBBB),
                   ),
                 ),
@@ -701,95 +698,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  Future<void> _getCurrentLocation() async {
-    setState(() => _isLocating = true);
-    try {
-      // تشێک بکە ئایا لۆکەیشن سەرڤیس کراوەیە
-      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(S.of(context, 'enableLocationService'))),
-          );
-        }
-        return;
-      }
-
-      LocationPermission perm = await Geolocator.checkPermission();
-      if (perm == LocationPermission.denied) {
-        perm = await Geolocator.requestPermission();
-        if (perm == LocationPermission.denied) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(S.of(context, 'locationPermissionNeeded'))),
-            );
-          }
-          return;
-        }
-      }
-      if (perm == LocationPermission.deniedForever) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(
-                    S.of(context, 'enableLocationSettings'))),
-          );
-        }
-        return;
-      }
-
-      final pos = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.best,
-          timeLimit: Duration(seconds: 30),
-        ),
-      );
-
-      final placemarks =
-          await placemarkFromCoordinates(pos.latitude, pos.longitude);
-      if (placemarks.isNotEmpty) {
-        final p = placemarks.first;
-        // شار لە نتیجەکە دەربهێنە
-        _city = p.locality ?? p.administrativeArea ?? p.subAdministrativeArea ?? '';
-        if (mounted && _cityC.text.isEmpty && _city.isNotEmpty) {
-          _cityC.text = _city;
-        }
-        final parts = [
-          p.street,
-          p.subLocality,
-          p.locality,
-          p.administrativeArea,
-          p.country,
-        ].where((s) => s != null && s.isNotEmpty);
-        if (mounted) {
-          _addrC.text = parts.join('، ');
-        }
-      } else {
-        // ئەگەر ناونیشانی نەدۆزییەوە، کۆئۆردیناتەکان دابنێ
-        _city = '';
-        if (mounted) {
-          _addrC.text = '${pos.latitude}, ${pos.longitude}';
-        }
-      }
-    } on LocationServiceDisabledException {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(S.of(context, 'enableGPSService'))),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${S.of(context, 'locationError')}: $e')),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isLocating = false);
-    }
-  }
-
   Widget _field(String label, TextEditingController c, String hint,
       {bool isLTR = false, int maxLines = 1}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -810,7 +718,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             hintStyle: TextStyle(
               fontSize: 12,
               color:
-                  isDark ? const Color(0xFF475569) : const Color(0xFFBBBBBB),
+                  isDark ? const Color(0xFFE2E8F0) : const Color(0xFFBBBBBB),
             ),
           ),
         ),
@@ -866,7 +774,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 style: TextStyle(
                   fontSize: 14,
                   color: isDark
-                      ? const Color(0xFF94A3B8)
+                      ? const Color(0xFFF1F5F9)
                       : const Color(0xFF64748B),
                 ),
               ),
@@ -1045,7 +953,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF162032) : const Color(0xFFF8FAFC),
+        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isDark ? const Color(0xFF2D3F5E) : const Color(0xFFE2E8F0),
@@ -1117,7 +1025,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               hintText: _hasColleges ? S.of(context, 'collegeNameHint') : S.of(context, 'deptNameHint'),
               hintStyle: TextStyle(
                 fontSize: 12,
-                color: isDark ? const Color(0xFF475569) : const Color(0xFFBBBBBB),
+                color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFFBBBBBB),
               ),
               prefixIcon: Icon(Iconsax.building_4, size: 18, color: AppTheme.primary),
             ),
@@ -1153,7 +1061,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         hintStyle: TextStyle(
                           fontSize: 11,
                           color: isDark
-                              ? const Color(0xFF475569)
+                              ? const Color(0xFFE2E8F0)
                               : const Color(0xFFBBBBBB),
                         ),
                         isDense: true,

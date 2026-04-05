@@ -31,6 +31,7 @@ class _FullMapScreenState extends State<FullMapScreen>
   late Animation<double> _pulseAnimation;
   late Animation<Offset> _cardSlide;
   late Animation<double> _cardFade;
+  double _currentZoom = 7.0;
 
   static const _defaultCenter = LatLng(36.1912, 44.0094);
 
@@ -184,12 +185,53 @@ class _FullMapScreenState extends State<FullMapScreen>
     return prov.allInstitutions.where((i) => i.type == type).length;
   }
 
+  // ── Clustering ──
+  // Returns two lists: individual markers (when zoom >= 12) or clusters
+  static const double _clusterZoomThreshold = 11.0;
+
+  List<_Cluster> _computeClusters(List<Institution> institutions) {
+    // At high zoom, each institution is its own "cluster" of 1
+    if (_currentZoom >= _clusterZoomThreshold) {
+      return institutions.map((inst) {
+        final pos = _getBaseLocation(inst);
+        return _Cluster(center: pos, institutions: [inst]);
+      }).toList();
+    }
+
+    // Grid-cell clustering based on zoom
+    final cellSize = _currentZoom < 7 ? 1.5 : (_currentZoom < 9 ? 0.5 : 0.15);
+    final cells = <String, List<Institution>>{};
+
+    for (final inst in institutions) {
+      final pos = _getBaseLocation(inst);
+      final cellX = (pos.latitude / cellSize).floor();
+      final cellY = (pos.longitude / cellSize).floor();
+      final key = '$cellX:$cellY';
+      cells.putIfAbsent(key, () => []).add(inst);
+    }
+
+    return cells.entries.map((entry) {
+      final insts = entry.value;
+      double latSum = 0, lngSum = 0;
+      for (final i in insts) {
+        final p = _getBaseLocation(i);
+        latSum += p.latitude;
+        lngSum += p.longitude;
+      }
+      return _Cluster(
+        center: LatLng(latSum / insts.length, lngSum / insts.length),
+        institutions: insts,
+      );
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final prov = context.watch<AppProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final institutions = _getFilteredInstitutions(prov);
     final positions = _computePositions(institutions);
+    final clusters = _computeClusters(institutions);
 
     return Scaffold(
       body: Stack(
@@ -203,6 +245,14 @@ class _FullMapScreenState extends State<FullMapScreen>
               minZoom: 5,
               maxZoom: 18,
               onTap: (_, __) => _clearSelection(),
+              onPositionChanged: (camera, hasGesture) {
+                if (hasGesture) {
+                  final newZoom = camera.zoom;
+                  if ((newZoom - _currentZoom).abs() > 0.3) {
+                    setState(() => _currentZoom = newZoom);
+                  }
+                }
+              },
             ),
             children: [
               TileLayer(
@@ -243,26 +293,41 @@ class _FullMapScreenState extends State<FullMapScreen>
                     );
                   },
                 ),
-              // Institution markers
+              // Institution markers / clusters
               MarkerLayer(
-                markers: institutions.map((inst) {
-                  final color = _typeColors[inst.type] ?? AppTheme.primary;
-                  final isSelected = _selectedInstitution?.id == inst.id;
-                  final pos = positions[inst.id] ?? _defaultCenter;
-                  return Marker(
-                    point: pos,
-                    width: isSelected ? 56 : 44,
-                    height: isSelected ? 66 : 54,
-                    alignment: Alignment.topCenter,
-                    child: GestureDetector(
-                      onTap: () => _selectInstitution(inst, pos),
-                      child: _MapPin(
-                        inst: inst,
-                        color: color,
-                        isSelected: isSelected,
+                markers: clusters.map((cluster) {
+                  if (cluster.count == 1) {
+                    // Single institution — original pin style
+                    final inst = cluster.institutions.first;
+                    final color = _typeColors[inst.type] ?? AppTheme.primary;
+                    final isSelected = _selectedInstitution?.id == inst.id;
+                    final pos = positions[inst.id] ?? cluster.center;
+                    return Marker(
+                      point: pos,
+                      width: isSelected ? 56 : 44,
+                      height: isSelected ? 66 : 54,
+                      alignment: Alignment.topCenter,
+                      child: GestureDetector(
+                        onTap: () => _selectInstitution(inst, pos),
+                        child: _MapPin(inst: inst, color: color, isSelected: isSelected),
                       ),
-                    ),
-                  );
+                    );
+                  } else {
+                    // Cluster marker
+                    return Marker(
+                      point: cluster.center,
+                      width: 56,
+                      height: 56,
+                      child: GestureDetector(
+                        onTap: () {
+                          final zoom = math.min(_currentZoom + 2.5, 18.0);
+                          _mapController.move(cluster.center, zoom);
+                          setState(() => _currentZoom = zoom);
+                        },
+                        child: _ClusterMarker(count: cluster.count),
+                      ),
+                    );
+                  }
                 }).toList(),
               ),
             ],
@@ -281,8 +346,8 @@ class _FullMapScreenState extends State<FullMapScreen>
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      (isDark ? const Color(0xFF0D1117) : Colors.white).withValues(alpha: 0.8),
-                      (isDark ? const Color(0xFF0D1117) : Colors.white).withValues(alpha: 0.0),
+                      (isDark ? const Color(0xFF0F172A) : Colors.white).withValues(alpha: 0.8),
+                      (isDark ? const Color(0xFF0F172A) : Colors.white).withValues(alpha: 0.0),
                     ],
                   ),
                 ),
@@ -301,7 +366,7 @@ class _FullMapScreenState extends State<FullMapScreen>
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: (isDark ? const Color(0xFF161B22) : Colors.white).withValues(alpha: 0.75),
+                      color: (isDark ? const Color(0xFF1E293B) : Colors.white).withValues(alpha: 0.75),
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(
                         color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08),
@@ -339,7 +404,7 @@ class _FullMapScreenState extends State<FullMapScreen>
                                     : '${institutions.length} / ${prov.allInstitutions.length}',
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color: isDark ? const Color(0xFF8B949E) : const Color(0xFF64748B),
+                                  color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF64748B),
                                 ),
                               ),
                             ],
@@ -429,17 +494,7 @@ class _FullMapScreenState extends State<FullMapScreen>
     );
   }
 
-  Widget _darkTileBuilder(BuildContext context, Widget tileWidget, TileImage tile) {
-    return ColorFiltered(
-      colorFilter: const ColorFilter.matrix([
-        0.95, 0, 0, 0, 0,
-        0, 0.95, 0, 0, 0,
-        0, 0, 0.95, 0, 0,
-        0, 0, 0, 1, 0,
-      ]),
-      child: tileWidget,
-    );
-  }
+
 
   Widget _buildFilterChip(String type, String label, bool isDark, AppProvider prov) {
     final isOn = _selectedType == type;
@@ -459,7 +514,7 @@ class _FullMapScreenState extends State<FullMapScreen>
             gradient: isOn
                 ? LinearGradient(colors: [color, color.withValues(alpha: 0.8)])
                 : null,
-            color: isOn ? null : (isDark ? const Color(0xFF161B22) : Colors.white).withValues(alpha: 0.85),
+            color: isOn ? null : (isDark ? const Color(0xFF1E293B) : Colors.white).withValues(alpha: 0.85),
             borderRadius: BorderRadius.circular(14),
             border: isOn ? null : Border.all(
               color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08),
@@ -482,7 +537,7 @@ class _FullMapScreenState extends State<FullMapScreen>
             children: [
               if (type == 'all')
                 Icon(Iconsax.element_equal, size: 14,
-                    color: isOn ? Colors.white : (isDark ? Colors.white60 : const Color(0xFF64748B)))
+                    color: isOn ? Colors.white : (isDark ? Colors.white : const Color(0xFF64748B)))
               else if (icon != null)
                 Icon(icon, size: 14,
                     color: isOn ? Colors.white : color),
@@ -492,7 +547,7 @@ class _FullMapScreenState extends State<FullMapScreen>
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: isOn ? FontWeight.w700 : FontWeight.w500,
-                  color: isOn ? Colors.white : (isDark ? Colors.white70 : const Color(0xFF475569)),
+                  color: isOn ? Colors.white : (isDark ? Colors.white : const Color(0xFF475569)),
                 ),
               ),
               if (isOn) ...[
@@ -532,7 +587,7 @@ class _FullMapScreenState extends State<FullMapScreen>
           filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
           child: Container(
             decoration: BoxDecoration(
-              color: (isDark ? const Color(0xFF161B22) : Colors.white).withValues(alpha: 0.82),
+              color: (isDark ? const Color(0xFF1E293B) : Colors.white).withValues(alpha: 0.82),
               borderRadius: BorderRadius.circular(22),
               border: Border.all(
                 color: colors[1].withValues(alpha: 0.2),
@@ -626,7 +681,7 @@ class _FullMapScreenState extends State<FullMapScreen>
                                     inst.city.isNotEmpty ? inst.city : S.of(context, 'unknown'),
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: isDark ? const Color(0xFF8B949E) : const Color(0xFF64748B),
+                                      color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF64748B),
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -677,7 +732,58 @@ class _FullMapScreenState extends State<FullMapScreen>
 }
 
 // ────────────────────────────────────────────────────────────────
-// Custom map pin marker
+// Cluster data model
+// ────────────────────────────────────────────────────────────────
+
+class _Cluster {
+  final LatLng center;
+  final List<Institution> institutions;
+  _Cluster({required this.center, required this.institutions});
+  int get count => institutions.length;
+}
+
+// ────────────────────────────────────────────────────────────────
+// Cluster marker widget
+// ────────────────────────────────────────────────────────────────
+
+class _ClusterMarker extends StatelessWidget {
+  final int count;
+  const _ClusterMarker({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    final size = count > 99 ? 56.0 : count > 9 ? 50.0 : 44.0;
+    return Center(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: AppTheme.primary,
+          border: Border.all(color: Colors.white, width: 2.5),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primary.withValues(alpha: 0.45),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            count > 99 ? '99+' : '$count',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 13,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // ────────────────────────────────────────────────────────────────
 class _MapPin extends StatelessWidget {
   final Institution inst;
@@ -818,7 +924,7 @@ class _GlassButton extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: (isDark ? const Color(0xFF21262D) : const Color(0xFFF1F5F9)).withValues(alpha: 0.7),
+              color: (isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9)).withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.06),
@@ -827,7 +933,7 @@ class _GlassButton extends StatelessWidget {
             child: Icon(
               icon,
               size: 18,
-              color: isDark ? Colors.white70 : const Color(0xFF475569),
+              color: isDark ? Colors.white : const Color(0xFF475569),
             ),
           ),
         ),

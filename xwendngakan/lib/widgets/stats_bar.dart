@@ -97,7 +97,7 @@ class StatsBar extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
-                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                  color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF94A3B8),
                 ),
               ),
             ],

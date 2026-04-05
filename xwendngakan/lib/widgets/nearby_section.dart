@@ -124,7 +124,7 @@ class NearbySection extends StatelessWidget {
                             S.of(context, 'nearbyDiscoverDesc'),
                             style: TextStyle(
                               fontSize: 10,
-                              color: isDark ? const Color(0xFF64748B) : const Color(0xFF475569),
+                              color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF475569),
                             ),
                           ),
                         ],
@@ -173,7 +173,7 @@ class NearbySection extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 9,
                       fontWeight: FontWeight.w600,
-                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
+                      color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF475569),
                     ),
                   ),
                 ],
@@ -210,7 +210,7 @@ class NearbySection extends StatelessWidget {
               S.of(context, 'nearbyLoading'),
               style: TextStyle(
                 fontSize: 12,
-                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
+                color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF475569),
               ),
             ),
           ],
@@ -235,7 +235,7 @@ class NearbySection extends StatelessWidget {
         width: 120,
         margin: const EdgeInsets.only(left: 8),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF161B22) : Colors.white,
+          color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(

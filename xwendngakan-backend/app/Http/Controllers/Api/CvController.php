@@ -137,4 +137,69 @@ class CvController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Admin: Get all CVs (unfiltered, with review status)
+     */
+    public function adminIndex(Request $request)
+    {
+        $query = Cv::latest();
+
+        $reviewed = $request->get('reviewed');
+        if ($reviewed === '1' || $reviewed === 'true') {
+            $query->where('is_reviewed', true);
+        } elseif ($reviewed === '0' || $reviewed === 'false') {
+            $query->where('is_reviewed', false);
+        }
+
+        $cvs = $query->paginate(20);
+
+        return response()->json([
+            'success' => true,
+            'data' => $cvs->items(),
+            'meta' => [
+                'current_page' => $cvs->currentPage(),
+                'last_page'    => $cvs->lastPage(),
+                'total'        => $cvs->total(),
+                'pending'      => Cv::where('is_reviewed', false)->count(),
+                'reviewed'     => Cv::where('is_reviewed', true)->count(),
+            ],
+        ]);
+    }
+
+    /**
+     * Admin: Toggle CV review status.
+     */
+    public function toggleReview(int $id)
+    {
+        $cv = Cv::findOrFail($id);
+        $cv->is_reviewed = !$cv->is_reviewed;
+        $cv->save();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $cv,
+            'message' => $cv->is_reviewed ? 'CV پشکنرا.' : 'CV گەڕایەوە بۆ چاوەڕوانکردن.',
+        ]);
+    }
+
+    /**
+     * Admin: Delete a CV.
+     */
+    public function adminDestroy(int $id)
+    {
+        $cv = Cv::findOrFail($id);
+
+        // Delete photo if exists
+        if ($cv->photo) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($cv->photo);
+        }
+
+        $cv->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'CV سڕایەوە.',
+        ]);
+    }
 }

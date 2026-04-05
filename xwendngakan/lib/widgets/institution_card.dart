@@ -170,7 +170,7 @@ class _InstitutionCardState extends State<InstitutionCard>
                                     Icon(
                                       Icons.location_on_rounded,
                                       size: 12,
-                                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                      color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF64748B),
                                     ),
                                     const SizedBox(width: 4),
                                     Flexible(
@@ -182,7 +182,7 @@ class _InstitutionCardState extends State<InstitutionCard>
                                         style: TextStyle(
                                           fontSize: 11,
                                           fontWeight: FontWeight.w600,
-                                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                          color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF64748B),
                                         ),
                                       ),
                                     ),

@@ -13,9 +13,9 @@ class FavoritesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final prov = context.watch<AppProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? const Color(0xFF0D1117) : const Color(0xFFF8FAFF);
+    final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFF);
     final textColor = isDark ? Colors.white : Colors.black87;
-    final hintColor = isDark ? Colors.white38 : Colors.black38;
+    final hintColor = isDark ? Colors.white : Colors.black38;
 
     final favorites = prov.favoriteInstitutions;
 

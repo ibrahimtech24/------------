@@ -27,12 +27,39 @@ class _HomeScreenState extends State<HomeScreen>
     with AutomaticKeepAliveClientMixin {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  bool _isLoadingMore = false;
 
   @override
   bool get wantKeepAlive => true;
 
   @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_isLoadingMore) return;
+    if (!_scrollController.hasClients) return;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    if (maxScroll - currentScroll <= 200) {
+      final prov = context.read<AppProvider>();
+      if (prov.hasMoreToShow && !prov.isLoading) {
+        _isLoadingMore = true;
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) {
+            prov.loadMore();
+            _isLoadingMore = false;
+          }
+        });
+      }
+    }
+  }
+
+  @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -44,9 +71,10 @@ class _HomeScreenState extends State<HomeScreen>
     final prov = context.watch<AppProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final filtered = prov.filteredInstitutions;
+    final displayed = prov.displayedInstitutions;
     final screenW = MediaQuery.of(context).size.width;
-    final bgColor = isDark ? const Color(0xFF0D1117) : const Color(0xFFF8FAFF);
-    final cardColor = isDark ? const Color(0xFF161B22) : Colors.white;
+    final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFF);
+    final cardColor = isDark ? const Color(0xFF1E293B) : Colors.white;
     final hasSubTabs = _getSubTabs(prov.currentTab) != null;
 
     return Directionality(
@@ -67,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen>
               strokeWidth: 2.5,
               child: CustomScrollView(
                 controller: _scrollController,
-                cacheExtent: 500,
+                cacheExtent: 200,
                 physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                 slivers: [
                   SliverToBoxAdapter(
@@ -83,6 +111,8 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                   ),
                   SliverToBoxAdapter(child: QuickCategories(prov: prov, isDark: isDark)),
+                  if (!prov.isOnline)
+                    SliverToBoxAdapter(child: _OfflineBanner(isDark: isDark, prov: prov)),
                   if (hasSubTabs)
                     SliverToBoxAdapter(child: SubTabsBar(prov: prov, isDark: isDark)),
                   if (!prov.isLoading && filtered.isNotEmpty)
@@ -95,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen>
                     SliverToBoxAdapter(child: HomeEmptyState(prov: prov, isDark: isDark, searchController: _searchController))
                   else
                     SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 120),
+                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
                       sliver: SliverGrid(
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: screenW > 600 ? 3 : 2,
@@ -105,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                         delegate: SliverChildBuilderDelegate(
                           (context, i) {
-                            final inst = filtered[i];
+                            final inst = displayed[i];
                             return RepaintBoundary(
                               child: InstitutionCard(
                                 institution: inst,
@@ -114,12 +144,18 @@ class _HomeScreenState extends State<HomeScreen>
                               ),
                             );
                           },
-                          childCount: filtered.length,
+                          childCount: displayed.length,
                           addRepaintBoundaries: true,
                           addAutomaticKeepAlives: false,
                         ),
                       ),
                     ),
+                  if (!prov.isLoading && filtered.isNotEmpty && prov.hasMoreToShow)
+                    SliverToBoxAdapter(
+                      child: _LoadingMoreIndicator(isDark: isDark),
+                    ),
+                  if (!prov.isLoading && filtered.isNotEmpty)
+                    const SliverToBoxAdapter(child: SizedBox(height: 100)),
                 ],
               ),
             ),
@@ -136,3 +172,116 @@ class _HomeScreenState extends State<HomeScreen>
   }
 }
 
+// ── Offline Banner ──────────────────────────────────────────
+
+class _OfflineBanner extends StatelessWidget {
+  final bool isDark;
+  final AppProvider prov;
+
+  const _OfflineBanner({required this.isDark, required this.prov});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.orange.withValues(alpha: isDark ? 0.15 : 0.1),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.wifi_off_rounded, color: Colors.orange, size: 18),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _S(context, 'noInternet'),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.orange,
+                    ),
+                  ),
+                  Text(
+                    _S(context, 'noInternetDesc'),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isDark ? Colors.orange.shade200 : Colors.orange.shade800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () => prov.fetchFromApi(),
+              child: Text(
+                _S(context, 'retry'),
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.orange,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _S(BuildContext ctx, String key) {
+    return prov.language == 'ar'
+        ? _ar[key] ?? key
+        : prov.language == 'en'
+            ? _en[key] ?? key
+            : _ku[key] ?? key;
+  }
+
+  static const _ku = {
+    'noInternet': 'ئینتەرنەت نییە',
+    'noInternetDesc': 'داتای کەش نیشاندەدرێت. پەیوەندیت بپشکنە.',
+    'retry': 'دووبارە هەوڵبدەوە',
+  };
+  static const _ar = {
+    'noInternet': 'لا يوجد اتصال بالإنترنت',
+    'noInternetDesc': 'يتم عرض البيانات المخزنة. تحقق من اتصالك.',
+    'retry': 'إعادة المحاولة',
+  };
+  static const _en = {
+    'noInternet': 'No Internet Connection',
+    'noInternetDesc': 'Showing cached data. Check your connection.',
+    'retry': 'Retry',
+  };
+}
+
+// ── Loading More Indicator ──────────────────────────────────────────
+
+class _LoadingMoreIndicator extends StatelessWidget {
+  final bool isDark;
+
+  const _LoadingMoreIndicator({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Center(
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(
+            strokeWidth: 2.5,
+            valueColor: AlwaysStoppedAnimation<Color>(
+              isDark ? const Color(0xFF93C5FD) : AppTheme.primary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

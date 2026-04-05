@@ -408,13 +408,13 @@ class _SignupScreenState extends State<SignupScreen>
           Row(
             children: [
               Icon(Iconsax.info_circle, size: 12,
-                  color: isDark ? const Color(0xFF475569) : const Color(0xFFBBBBBB)),
+                  color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFFBBBBBB)),
               const SizedBox(width: 4),
               Text(
                 S.of(context, 'minChars'),
                 style: TextStyle(
                   fontSize: 11,
-                  color: isDark ? const Color(0xFF475569) : const Color(0xFFBBBBBB),
+                  color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFFBBBBBB),
                 ),
               ),
             ],
@@ -455,7 +455,7 @@ class _SignupScreenState extends State<SignupScreen>
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+            color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF64748B),
           ),
         ),
         const SizedBox(height: 8),
@@ -487,7 +487,7 @@ class _SignupScreenState extends State<SignupScreen>
               hintText: hint,
               hintStyle: TextStyle(
                 fontSize: 13,
-                color: isDark ? const Color(0xFF475569) : const Color(0xFFBBBBBB),
+                color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFFBBBBBB),
                 fontWeight: FontWeight.w400,
               ),
               prefixIcon: Container(
@@ -503,7 +503,7 @@ class _SignupScreenState extends State<SignupScreen>
                   ? IconButton(
                       icon: Icon(
                         (obscureState ?? true) ? Iconsax.eye_slash : Iconsax.eye,
-                        color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                        color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF94A3B8),
                         size: 20,
                       ),
                       onPressed: onToggleObscure,
@@ -625,7 +625,7 @@ class _SignupScreenState extends State<SignupScreen>
             S.of(context, 'haveAccount'),
             style: TextStyle(
               fontSize: 13,
-              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+              color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF64748B),
             ),
           ),
           const SizedBox(width: 4),

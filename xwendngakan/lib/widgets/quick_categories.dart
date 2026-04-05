@@ -128,7 +128,7 @@ class QuickCategories extends StatelessWidget {
                           fontWeight: isOn ? FontWeight.w800 : FontWeight.w600,
                           color: isOn
                               ? Colors.white
-                              : (isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569)),
+                              : (isDark ? const Color(0xFFF1F5F9) : const Color(0xFF475569)),
                           letterSpacing: 0.1,
                         ),
                       ),

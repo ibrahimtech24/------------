@@ -172,6 +172,66 @@ class InstitutionController extends Controller
     }
 
     /**
+     * Admin: Get all pending institutions.
+     */
+    public function adminIndex(Request $request)
+    {
+        $query = Institution::query();
+
+        $status = $request->get('status', 'pending');
+        if ($status === 'pending') {
+            $query->where('approved', false);
+        } elseif ($status === 'approved') {
+            $query->where('approved', true);
+        }
+        // 'all' returns everything
+
+        $query->latest();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $query->get(),
+            'meta'    => [
+                'pending'  => Institution::where('approved', false)->count(),
+                'approved' => Institution::where('approved', true)->count(),
+                'total'    => Institution::count(),
+            ],
+        ]);
+    }
+
+    /**
+     * Admin: Approve or reject an institution.
+     */
+    public function toggleApproval(string $id)
+    {
+        $institution = Institution::findOrFail($id);
+        $institution->approved = !$institution->approved;
+        $institution->save();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $institution,
+            'message' => $institution->approved
+                ? 'دامەزراوەکە پاساو کرا.'
+                : 'دامەزراوەکە ڕەتکرایەوە.',
+        ]);
+    }
+
+    /**
+     * Admin: Delete any institution.
+     */
+    public function adminDestroy(string $id)
+    {
+        $institution = Institution::findOrFail($id);
+        $institution->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'دامەزراوەکە سڕایەوە.',
+        ]);
+    }
+
+    /**
      * Stats endpoint.
      */
     public function stats()

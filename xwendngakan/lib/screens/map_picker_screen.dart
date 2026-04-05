@@ -234,7 +234,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
+                            color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF475569),
                           ),
                         ),
                       if (_address.isNotEmpty)
@@ -244,7 +244,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                             _address,
                             style: TextStyle(
                               fontSize: 12,
-                              color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                              color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF94A3B8),
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,

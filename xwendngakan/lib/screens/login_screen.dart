@@ -81,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen>
       if (result['success'] == true) {
         AppSnackbar.success(
             context, result['message'] ?? S.of(context, 'loginSuccess'));
-        Navigator.of(context).pushReplacement(
+        Navigator.of(context).pushAndRemoveUntil(
           PageRouteBuilder(
             pageBuilder: (_, __, ___) => const MainNavScreen(),
             transitionDuration: const Duration(milliseconds: 500),
@@ -98,6 +98,7 @@ class _LoginScreenState extends State<LoginScreen>
               );
             },
           ),
+          (route) => false,
         );
       } else {
         final errors = result['errors'];
@@ -113,18 +114,6 @@ class _LoginScreenState extends State<LoginScreen>
       setState(() => _isLoading = false);
       _showMsg(S.of(context, 'connectionError'));
     }
-  }
-
-  void _skipLogin() {
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (_, __, ___) => const MainNavScreen(),
-        transitionDuration: const Duration(milliseconds: 500),
-        transitionsBuilder: (_, animation, __, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-      ),
-    );
   }
 
   void _showMsg(String msg) {
@@ -449,7 +438,7 @@ class _LoginScreenState extends State<LoginScreen>
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+            color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF64748B),
           ),
         ),
         const SizedBox(height: 8),
@@ -481,7 +470,7 @@ class _LoginScreenState extends State<LoginScreen>
               hintText: hint,
               hintStyle: TextStyle(
                 fontSize: 13,
-                color: isDark ? const Color(0xFF475569) : const Color(0xFFBBBBBB),
+                color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFFBBBBBB),
                 fontWeight: FontWeight.w400,
               ),
               prefixIcon: Container(
@@ -497,7 +486,7 @@ class _LoginScreenState extends State<LoginScreen>
                   ? IconButton(
                       icon: Icon(
                         _obscure ? Iconsax.eye_slash : Iconsax.eye,
-                        color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                        color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF94A3B8),
                         size: 20,
                       ),
                       onPressed: () => setState(() => _obscure = !_obscure),
@@ -619,7 +608,7 @@ class _LoginScreenState extends State<LoginScreen>
             S.of(context, 'noAccount'),
             style: TextStyle(
               fontSize: 13,
-              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+              color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF64748B),
             ),
           ),
           const SizedBox(width: 4),

@@ -7,7 +7,7 @@ import '../services/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_snackbar.dart';
 import 'login_screen.dart';
-import 'admin_dashboard_screen.dart';
+
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -16,11 +16,11 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final prov = context.watch<AppProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF080E1E) : const Color(0xFFF3F6FC);
-    final cardBg = isDark ? const Color(0xFF131B2E) : Colors.white;
-    final borderColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFE8EDF5);
+    final bg = isDark ? const Color(0xFF0F172A) : const Color(0xFFF3F6FC);
+    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFE8EDF5);
     final textPrimary = isDark ? Colors.white : const Color(0xFF1E293B);
-    final textSecondary = isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8);
+    final textSecondary = isDark ? const Color(0xFFF1F5F9) : const Color(0xFF94A3B8);
 
     return Scaffold(
       backgroundColor: bg,
@@ -102,47 +102,7 @@ class SettingsScreen extends StatelessWidget {
                 _languageTile(context, prov, isDark, textPrimary, textSecondary),
               ],
             ),
-
             const SizedBox(height: 16),
-
-            // ── Admin Dashboard (only for logged-in users) ──
-            if (prov.isLoggedIn) ...[
-              _sectionLabel(S.of(context, 'adminDashboard'), textSecondary),
-              const SizedBox(height: 8),
-              _buildGroupCard(
-                isDark: isDark,
-                cardBg: cardBg,
-                borderColor: borderColor,
-                children: [
-                  InkWell(
-                    borderRadius: BorderRadius.circular(18),
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const AdminDashboardScreen(),
-                        ),
-                      );
-                    },
-                    child: _groupTile(
-                      icon: Iconsax.shield_tick5,
-                      iconBg: const Color(0xFF8B5CF6),
-                      title: S.of(context, 'adminPosts'),
-                      subtitle: S.of(context, 'adminPostsDesc'),
-                      isDark: isDark,
-                      textPrimary: textPrimary,
-                      textSecondary: textSecondary,
-                      trailing: Icon(
-                        Iconsax.arrow_left_2,
-                        size: 16,
-                        color: textSecondary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-            ],
-
             // ── About Group ──
             _sectionLabel(S.of(context, 'about'), textSecondary),
             const SizedBox(height: 8),
@@ -219,7 +179,7 @@ class SettingsScreen extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF0C1222) : const Color(0xFFF5F7FB),
+                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF5F7FB),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -227,7 +187,7 @@ class SettingsScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         height: 1.8,
-                        color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
+                        color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF64748B),
                       ),
                     ),
                   ),
@@ -365,8 +325,13 @@ class SettingsScreen extends StatelessWidget {
       {'code': 'ku', 'name': S.of(context, 'kurdish'), 'flag': ''},
       {'code': 'ar', 'name': S.of(context, 'arabic'), 'flag': '🇸🇦'},
       {'code': 'en', 'name': 'English', 'flag': '🇬🇧'},
+      {'code': 'tr', 'name': 'Türkçe', 'flag': '🇹🇷'},
+      {'code': 'fr', 'name': 'Français', 'flag': '🇫🇷'},
     ];
-    final current = languages.firstWhere((l) => l['code'] == prov.language);
+    final current = languages.firstWhere(
+      (l) => l['code'] == prov.language,
+      orElse: () => languages.first,
+    );
 
     return InkWell(
       onTap: () {
@@ -376,7 +341,7 @@ class SettingsScreen extends StatelessWidget {
           builder: (ctx) {
             return Container(
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF131B2E) : Colors.white,
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(24),
                   topRight: Radius.circular(24),
@@ -392,7 +357,7 @@ class SettingsScreen extends StatelessWidget {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFFE2E8F0),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -600,7 +565,7 @@ class SettingsScreen extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: isDark
-                      ? [const Color(0xFF1A2542), const Color(0xFF131B2E)]
+                      ? [const Color(0xFF1E293B), const Color(0xFF1A2332)]
                       : [const Color(0xFFF0F4FF), const Color(0xFFF8F9FE)],
                 ),
                 borderRadius: const BorderRadius.only(
@@ -726,7 +691,7 @@ class SettingsScreen extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: isDark
-                    ? [const Color(0xFF1A2542), const Color(0xFF131B2E)]
+                    ? [const Color(0xFF1E293B), const Color(0xFF1A2332)]
                     : [const Color(0xFFF0F4FF), const Color(0xFFF8F9FE)],
               ),
               borderRadius: const BorderRadius.only(
@@ -831,7 +796,7 @@ class _LogoutButtonState extends State<_LogoutButton> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
-                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF64748B),
               ),
             ),
             actionsAlignment: MainAxisAlignment.center,
@@ -843,7 +808,7 @@ class _LogoutButtonState extends State<_LogoutButton> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                     side: BorderSide(
-                      color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFFE2E8F0),
                     ),
                   ),
                 ),
@@ -851,7 +816,7 @@ class _LogoutButtonState extends State<_LogoutButton> {
                   S.of(context, 'no'),
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF64748B),
                   ),
                 ),
               ),

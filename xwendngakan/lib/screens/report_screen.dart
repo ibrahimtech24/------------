@@ -134,10 +134,10 @@ class _ReportScreenState extends State<ReportScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? const Color(0xFF0D1117) : const Color(0xFFF8FAFF);
-    final cardColor = isDark ? const Color(0xFF161B22) : Colors.white;
+    final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFF);
+    final cardColor = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDark ? Colors.white : Colors.black87;
-    final hintColor = isDark ? Colors.white38 : Colors.black38;
+    final hintColor = isDark ? Colors.white : Colors.black38;
 
     // Get current language (default to Kurdish)
     final lang = Localizations.localeOf(context).languageCode;

@@ -119,7 +119,7 @@ class _DetailScreenState extends State<DetailScreen>
           statusBarIconBrightness: Brightness.light,
         ),
         child: Scaffold(
-          backgroundColor: isDark ? const Color(0xFF0A0E1A) : const Color(0xFFF2F4F8),
+          backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF2F4F8),
           body: FadeTransition(
             opacity: _fadeAnimation,
             child: CustomScrollView(
@@ -131,7 +131,7 @@ class _DetailScreenState extends State<DetailScreen>
                   expandedHeight: size.height * 0.42,
                   pinned: true,
                   stretch: true,
-                  backgroundColor: isDark ? const Color(0xFF0A0E1A) : Colors.white,
+                  backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.white,
                   surfaceTintColor: Colors.transparent,
                   elevation: 0,
                   leading: _buildGlassButton(
@@ -613,7 +613,7 @@ class _DetailScreenState extends State<DetailScreen>
   }
 
   List<Widget> _buildAboutSection(Institution d, bool isDark) {
-    if (d.desc == null || d.desc.trim().isEmpty) {
+    if (d.desc.trim().isEmpty) {
       return [_buildEmptyState(S.of(context, 'noAboutInfo'), isDark)];
     }
     return [
@@ -634,7 +634,7 @@ class _DetailScreenState extends State<DetailScreen>
               style: TextStyle(
                 fontSize: 14,
                 height: 1.8,
-                color: isDark ? Colors.grey[300] : Colors.grey[700],
+                color: isDark ? Colors.grey[200] : Colors.grey[700],
               ),
             ),
           ],
@@ -896,14 +896,14 @@ class _DetailScreenState extends State<DetailScreen>
               Icon(
                 Iconsax.document,
                 size: 40,
-                color: isDark ? Colors.grey[600] : Colors.grey[400],
+                color: isDark ? Colors.grey[300] : Colors.grey[400],
               ),
               const SizedBox(height: 12),
               Text(
                 message,
                 style: TextStyle(
                   fontSize: 14,
-                  color: isDark ? Colors.grey[500] : Colors.grey[500],
+                  color: isDark ? Colors.grey[200] : Colors.grey[500],
                 ),
               ),
             ],
@@ -1221,7 +1221,7 @@ class _DetailScreenState extends State<DetailScreen>
                   d.addr,
                   style: TextStyle(
                     fontSize: 13,
-                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+                    color: isDark ? Colors.grey[200] : Colors.grey[600],
                   ),
                 ),
               ],
@@ -1353,7 +1353,7 @@ class _DetailScreenState extends State<DetailScreen>
                     label,
                     style: TextStyle(
                       fontSize: 12,
-                      color: isDark ? Colors.grey[400] : Colors.grey[600],
+                      color: isDark ? Colors.grey[200] : Colors.grey[600],
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -1373,7 +1373,7 @@ class _DetailScreenState extends State<DetailScreen>
             Icon(
               Iconsax.arrow_left_2,
               size: 16,
-              color: isDark ? Colors.grey[600] : Colors.grey[400],
+              color: isDark ? Colors.grey[300] : Colors.grey[400],
             ),
           ],
         ),
@@ -1483,14 +1483,15 @@ class _DetailScreenState extends State<DetailScreen>
   // ═══════════════════════════════════════════
 
   List<Widget> _buildPostsSection(Institution d, bool isDark, Color primaryColor) {
+    final isAdmin = context.read<AppProvider>().isAdmin;
     return [
-      // ── Facebook-style "Create Post" bar ──
-      if (ApiService.isLoggedIn)
+      // ── Facebook-style "Create Post" bar (admin only) ──
+      if (isAdmin)
         Container(
           margin: const EdgeInsets.only(bottom: 10),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1A2035) : Colors.white,
+            color: isDark ? const Color(0xFF1E293B) : Colors.white,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isDark ? Colors.white.withValues(alpha: 0.06) : const Color(0xFFE4E6EB),
@@ -1526,7 +1527,7 @@ class _DetailScreenState extends State<DetailScreen>
                       S.of(context, 'postContentHint'),
                       style: TextStyle(
                         fontSize: 14,
-                        color: isDark ? Colors.grey[500] : const Color(0xFF65676B),
+                        color: isDark ? Colors.grey[200] : const Color(0xFF65676B),
                       ),
                     ),
                   ),
@@ -1550,7 +1551,7 @@ class _DetailScreenState extends State<DetailScreen>
         ),
 
       // ── Divider line ──
-      if (ApiService.isLoggedIn)
+      if (isAdmin)
         Container(
           height: 8,
           margin: const EdgeInsets.only(bottom: 10),
@@ -1565,7 +1566,7 @@ class _DetailScreenState extends State<DetailScreen>
         Container(
           padding: const EdgeInsets.symmetric(vertical: 40),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1A2035) : Colors.white,
+            color: isDark ? const Color(0xFF1E293B) : Colors.white,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Center(
@@ -1584,7 +1585,7 @@ class _DetailScreenState extends State<DetailScreen>
                   '...',
                   style: TextStyle(
                     fontSize: 13,
-                    color: isDark ? Colors.grey[500] : const Color(0xFF65676B),
+                    color: isDark ? Colors.grey[200] : const Color(0xFF65676B),
                   ),
                 ),
               ],
@@ -1597,7 +1598,7 @@ class _DetailScreenState extends State<DetailScreen>
         Container(
           padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 30),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1A2035) : Colors.white,
+            color: isDark ? const Color(0xFF1E293B) : Colors.white,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isDark ? Colors.white.withValues(alpha: 0.06) : const Color(0xFFE4E6EB),
@@ -1614,7 +1615,7 @@ class _DetailScreenState extends State<DetailScreen>
                 child: Icon(
                   Iconsax.document_text,
                   size: 40,
-                  color: isDark ? Colors.grey[500] : const Color(0xFF65676B),
+                  color: isDark ? Colors.grey[200] : const Color(0xFF65676B),
                 ),
               ),
               const SizedBox(height: 16),
@@ -1632,7 +1633,7 @@ class _DetailScreenState extends State<DetailScreen>
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
-                  color: isDark ? Colors.grey[500] : const Color(0xFF65676B),
+                  color: isDark ? Colors.grey[200] : const Color(0xFF65676B),
                   height: 1.4,
                 ),
               ),
@@ -1716,7 +1717,7 @@ class _DetailScreenState extends State<DetailScreen>
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1A2035) : Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isDark ? Colors.white.withValues(alpha: 0.06) : const Color(0xFFE4E6EB),
@@ -1773,7 +1774,7 @@ class _DetailScreenState extends State<DetailScreen>
                             post.formattedDate,
                             style: TextStyle(
                               fontSize: 12,
-                              color: isDark ? Colors.grey[500] : const Color(0xFF65676B),
+                              color: isDark ? Colors.grey[200] : const Color(0xFF65676B),
                             ),
                           ),
                           const SizedBox(width: 4),
@@ -1781,13 +1782,13 @@ class _DetailScreenState extends State<DetailScreen>
                             ' · ',
                             style: TextStyle(
                               fontSize: 12,
-                              color: isDark ? Colors.grey[600] : const Color(0xFF65676B),
+                              color: isDark ? Colors.grey[300] : const Color(0xFF65676B),
                             ),
                           ),
                           Icon(
                             Icons.public,
                             size: 12,
-                            color: isDark ? Colors.grey[500] : const Color(0xFF65676B),
+                            color: isDark ? Colors.grey[200] : const Color(0xFF65676B),
                           ),
                           if (!post.approved) ...[
                             const SizedBox(width: 6),
@@ -1823,7 +1824,7 @@ class _DetailScreenState extends State<DetailScreen>
                       child: Icon(
                         Icons.more_horiz,
                         size: 22,
-                        color: isDark ? Colors.grey[400] : const Color(0xFF65676B),
+                        color: isDark ? Colors.grey[200] : const Color(0xFF65676B),
                       ),
                     ),
                   ),
@@ -1905,7 +1906,7 @@ class _DetailScreenState extends State<DetailScreen>
                             color: const Color(0xFF1877F2),
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: isDark ? const Color(0xFF1A2035) : Colors.white,
+                              color: isDark ? const Color(0xFF1E293B) : Colors.white,
                               width: 2,
                             ),
                           ),
@@ -1923,7 +1924,7 @@ class _DetailScreenState extends State<DetailScreen>
                             color: const Color(0xFFED4956),
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: isDark ? const Color(0xFF1A2035) : Colors.white,
+                              color: isDark ? const Color(0xFF1E293B) : Colors.white,
                               width: 2,
                             ),
                           ),
@@ -1940,7 +1941,7 @@ class _DetailScreenState extends State<DetailScreen>
                   '',
                   style: TextStyle(
                     fontSize: 13,
-                    color: isDark ? Colors.grey[400] : const Color(0xFF65676B),
+                    color: isDark ? Colors.grey[200] : const Color(0xFF65676B),
                   ),
                 ),
               ],
@@ -1965,19 +1966,19 @@ class _DetailScreenState extends State<DetailScreen>
                 _buildFbActionBtn(
                   icon: Iconsax.like_1,
                   label: S.of(context, 'like'),
-                  color: isDark ? Colors.grey[400]! : const Color(0xFF65676B),
+                  color: isDark ? Colors.grey[200]! : const Color(0xFF65676B),
                   isDark: isDark,
                 ),
                 _buildFbActionBtn(
                   icon: Iconsax.message,
                   label: S.of(context, 'comment'),
-                  color: isDark ? Colors.grey[400]! : const Color(0xFF65676B),
+                  color: isDark ? Colors.grey[200]! : const Color(0xFF65676B),
                   isDark: isDark,
                 ),
                 _buildFbActionBtn(
                   icon: Iconsax.share,
                   label: S.of(context, 'shareLabel'),
-                  color: isDark ? Colors.grey[400]! : const Color(0xFF65676B),
+                  color: isDark ? Colors.grey[200]! : const Color(0xFF65676B),
                   isDark: isDark,
                 ),
               ],
@@ -2043,7 +2044,7 @@ class _DetailScreenState extends State<DetailScreen>
                 maxHeight: MediaQuery.of(ctx).size.height * 0.85,
               ),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1A2035) : Colors.white,
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
@@ -2107,7 +2108,7 @@ class _DetailScreenState extends State<DetailScreen>
                                           if (mounted) {
                                             ScaffoldMessenger.of(context).showSnackBar(
                                               SnackBar(
-                                                content: Text(S.of(context, 'postAwaitingApproval')),
+                                                content: Text(S.of(context, 'postPublished')),
                                                 backgroundColor: primaryColor,
                                               ),
                                             );
@@ -2174,7 +2175,7 @@ class _DetailScreenState extends State<DetailScreen>
                                     Icon(
                                       Icons.public,
                                       size: 12,
-                                      color: isDark ? Colors.grey[400] : const Color(0xFF65676B),
+                                      color: isDark ? Colors.grey[200] : const Color(0xFF65676B),
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
@@ -2182,14 +2183,14 @@ class _DetailScreenState extends State<DetailScreen>
                                       style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w600,
-                                        color: isDark ? Colors.grey[400] : const Color(0xFF65676B),
+                                        color: isDark ? Colors.grey[200] : const Color(0xFF65676B),
                                       ),
                                     ),
                                     const SizedBox(width: 2),
                                     Icon(
                                       Icons.arrow_drop_down,
                                       size: 14,
-                                      color: isDark ? Colors.grey[400] : const Color(0xFF65676B),
+                                      color: isDark ? Colors.grey[200] : const Color(0xFF65676B),
                                     ),
                                   ],
                                 ),
@@ -2213,7 +2214,7 @@ class _DetailScreenState extends State<DetailScreen>
                         decoration: InputDecoration(
                           hintText: S.of(context, 'postTitleHint'),
                           hintStyle: TextStyle(
-                            color: isDark ? Colors.grey[600] : const Color(0xFFC0C0C0),
+                            color: isDark ? Colors.grey[300] : const Color(0xFFC0C0C0),
                             fontWeight: FontWeight.w500,
                           ),
                           border: InputBorder.none,
@@ -2238,7 +2239,7 @@ class _DetailScreenState extends State<DetailScreen>
                           decoration: InputDecoration(
                             hintText: S.of(context, 'postContentHint'),
                             hintStyle: TextStyle(
-                              color: isDark ? Colors.grey[700] : const Color(0xFFC0C0C0),
+                              color: isDark ? Colors.grey[300] : const Color(0xFFC0C0C0),
                               fontSize: 22,
                             ),
                             border: InputBorder.none,

@@ -53,9 +53,9 @@ class ForceUpdateDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? const Color(0xFF161B22) : Colors.white;
+    final bgColor = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDark ? Colors.white : Colors.black87;
-    final hintColor = isDark ? Colors.white54 : Colors.black54;
+    final hintColor = isDark ? Colors.white : Colors.black54;
 
     return WillPopScope(
       onWillPop: () async => !forceUpdate,

@@ -8,8 +8,8 @@ class LoadingShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final base = isDark ? const Color(0xFF21262D) : const Color(0xFFE2E8F0);
-    final highlight = isDark ? const Color(0xFF30363D) : const Color(0xFFF8FAFC);
+    final base = isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
+    final highlight = isDark ? const Color(0xFF64748B) : const Color(0xFFF8FAFC);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -29,7 +29,7 @@ class LoadingShimmer extends StatelessWidget {
             highlightColor: highlight,
             child: Container(
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF161B22) : Colors.white,
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
                 borderRadius: BorderRadius.circular(24),
               ),
               child: Column(

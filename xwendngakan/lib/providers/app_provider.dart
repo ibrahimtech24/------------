@@ -9,6 +9,7 @@ import '../models/stats.dart';
 import '../data/constants.dart';
 import '../data/institutions_data.dart';
 import '../services/api_service.dart';
+import '../services/database_service.dart';
 
 enum SortMode { defaultSort, alpha, city }
 
@@ -35,6 +36,8 @@ class AppProvider extends ChangeNotifier {
   bool _hasSelectedLanguage = false;
   bool _hasCompletedOnboarding = false;
   bool _isInitDone = false;
+  int _displayLimit = 10;
+  static const int _perPage = 10;
 
   AppProvider() {
     _init();
@@ -80,18 +83,37 @@ class AppProvider extends ChangeNotifier {
 
     try {
       final institutions = await ApiService.getInstitutions();
-      _db = institutions.isNotEmpty ? institutions : InstitutionsData.getAll();
-      _isOnline = true;
-      // Fetch stats and app data (types) from backend
-      await fetchStats();
-      await fetchAppData();
+      if (institutions.isNotEmpty) {
+        _db = institutions;
+        _isOnline = true;
+        // Cache to SQLite for offline use
+        DatabaseService.cacheInstitutions(institutions).catchError((_) {});
+        await fetchStats();
+        await fetchAppData();
+      } else {
+        throw Exception('empty response');
+      }
     } catch (e) {
-      // Offline - use local data
-      _db = InstitutionsData.getAll();
       _isOnline = false;
-      if (_db.isEmpty) {
-        _hasError = true;
-        _errorMessage = e.toString();
+      // Try SQLite cache first
+      try {
+        final cached = await DatabaseService.getCachedInstitutions();
+        if (cached.isNotEmpty) {
+          _db = cached;
+        } else {
+          // Last fallback: bundled static data
+          _db = InstitutionsData.getAll();
+          if (_db.isEmpty) {
+            _hasError = true;
+            _errorMessage = e.toString();
+          }
+        }
+      } catch (_) {
+        _db = InstitutionsData.getAll();
+        if (_db.isEmpty) {
+          _hasError = true;
+          _errorMessage = e.toString();
+        }
       }
     }
 
@@ -135,7 +157,7 @@ class AppProvider extends ChangeNotifier {
   SortMode get sortMode => _sortMode;
   bool get isDarkMode => _isDarkMode;
   String get language => _language;
-  bool get isRtl => _language != 'en';
+  bool get isRtl => _language == 'ku' || _language == 'ar';
   bool get hasSelectedLanguage => _hasSelectedLanguage;
   bool get hasCompletedOnboarding => _hasCompletedOnboarding;
   bool get isInitDone => _isInitDone;
@@ -145,12 +167,13 @@ class AppProvider extends ChangeNotifier {
   String get errorMessage => _errorMessage;
   bool get isLoggedIn => ApiService.isLoggedIn;
   Map<String, dynamic>? get currentUser => _currentUser;
+  bool get isAdmin => _currentUser?['is_admin'] == true || _currentUser?['is_admin'] == 1;
   Stats? get stats => _stats;
 
   /// Pick the right localized value from a map based on current language.
   /// Looks for field_en, field_ar, or falls back to field (Kurdish).
   String localizedField(Map<String, dynamic> map, String field) {
-    if (_language == 'en') {
+    if (_language == 'en' || _language == 'tr' || _language == 'fr') {
       final v = map['${field}_en'] as String?;
       if (v != null && v.isNotEmpty) return v;
     } else if (_language == 'ar') {
@@ -251,6 +274,28 @@ class AppProvider extends ChangeNotifier {
     return list;
   }
 
+  // Pagination
+  List<Institution> get displayedInstitutions {
+    final all = filteredInstitutions;
+    if (_displayLimit >= all.length) return all;
+    return all.sublist(0, _displayLimit);
+  }
+
+  bool get hasMoreToShow => filteredInstitutions.length > _displayLimit;
+
+  int get displayedCount => displayedInstitutions.length;
+
+  int get totalFilteredCount => filteredInstitutions.length;
+
+  void loadMore() {
+    _displayLimit += _perPage;
+    notifyListeners();
+  }
+
+  void _resetDisplayLimit() {
+    _displayLimit = _perPage;
+  }
+
   // Stats
   int get totalApproved => _db.where((d) => d.approved).length;
 
@@ -332,37 +377,44 @@ class AppProvider extends ChangeNotifier {
   void setTab(String tab) {
     _currentTab = tab;
     _currentSub = '';
+    _resetDisplayLimit();
     notifyListeners();
   }
 
   void setSub(String sub) {
     _currentSub = sub;
+    _resetDisplayLimit();
     notifyListeners();
   }
 
   void setSearch(String q) {
     _searchQuery = q;
+    _resetDisplayLimit();
     notifyListeners();
   }
 
   void setFilterType(String t) {
     _filterType = t;
+    _resetDisplayLimit();
     notifyListeners();
   }
 
   void setFilterCountry(String c) {
     _filterCountry = c;
     _filterCity = '';
+    _resetDisplayLimit();
     notifyListeners();
   }
 
   void setFilterCity(String c) {
     _filterCity = c;
+    _resetDisplayLimit();
     notifyListeners();
   }
 
   void setSort(SortMode m) {
     _sortMode = m;
+    _resetDisplayLimit();
     notifyListeners();
   }
 
@@ -399,6 +451,7 @@ class AppProvider extends ChangeNotifier {
     _currentTab = 'all';
     _currentSub = '';
     _sortMode = SortMode.defaultSort;
+    _resetDisplayLimit();
     notifyListeners();
   }
 

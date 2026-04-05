@@ -690,5 +690,114 @@ class ApiService {
     } catch (_) {}
     return {};
   }
+
+  // ── Admin: Institutions ──
+
+  static Future<Map<String, dynamic>> getAdminInstitutions({String status = 'pending'}) async {
+    try {
+      final uri = Uri.parse('$baseUrl/admin/institutions')
+          .replace(queryParameters: {'status': status});
+      final res = await http.get(uri, headers: _headers).timeout(_timeout);
+      if (res.statusCode == 200) {
+        final body = jsonDecode(res.body);
+        final List items = body['data'] ?? [];
+        return {
+          'institutions': items.map((j) => Institution.fromJson(j)).toList(),
+          'meta': body['meta'] ?? {},
+        };
+      }
+    } catch (_) {}
+    return {'institutions': [], 'meta': {}};
+  }
+
+  static Future<Map<String, dynamic>> toggleInstitutionApproval(int id) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/admin/institutions/$id/toggle-approval'),
+      headers: _headers,
+    ).timeout(_timeout);
+    return jsonDecode(res.body);
+  }
+
+  static Future<bool> adminDeleteInstitution(int id) async {
+    final res = await http.delete(
+      Uri.parse('$baseUrl/admin/institutions/$id'),
+      headers: _headers,
+    ).timeout(_timeout);
+    return res.statusCode == 200;
+  }
+
+  // ── Admin: Reports ──
+
+  static Future<Map<String, dynamic>> getAdminReports({String status = 'pending'}) async {
+    try {
+      final params = status == 'all' ? <String, String>{} : {'status': status};
+      final uri = Uri.parse('$baseUrl/admin/reports')
+          .replace(queryParameters: params.isNotEmpty ? params : null);
+      final res = await http.get(uri, headers: _headers).timeout(_timeout);
+      if (res.statusCode == 200) {
+        final body = jsonDecode(res.body);
+        return {
+          'reports': List<Map<String, dynamic>>.from(
+              (body['data'] as List).map((e) => Map<String, dynamic>.from(e))),
+          'meta': body['meta'] ?? {},
+        };
+      }
+    } catch (_) {}
+    return {'reports': [], 'meta': {}};
+  }
+
+  static Future<Map<String, dynamic>> updateReportStatus(int id, String status) async {
+    final res = await http.patch(
+      Uri.parse('$baseUrl/admin/reports/$id/status'),
+      headers: _headers,
+      body: jsonEncode({'status': status}),
+    ).timeout(_timeout);
+    return jsonDecode(res.body);
+  }
+
+  static Future<bool> deleteReport(int id) async {
+    final res = await http.delete(
+      Uri.parse('$baseUrl/admin/reports/$id'),
+      headers: _headers,
+    ).timeout(_timeout);
+    return res.statusCode == 200;
+  }
+
+  // ── Admin: CVs ──
+
+  static Future<Map<String, dynamic>> getAdminCvs({String? reviewed}) async {
+    try {
+      final params = <String, String>{};
+      if (reviewed != null) params['reviewed'] = reviewed;
+      final uri = Uri.parse('$baseUrl/admin/cvs')
+          .replace(queryParameters: params.isNotEmpty ? params : null);
+      final res = await http.get(uri, headers: _headers).timeout(_timeout);
+      if (res.statusCode == 200) {
+        final body = jsonDecode(res.body);
+        return {
+          'cvs': List<Map<String, dynamic>>.from(
+              (body['data'] as List).map((e) => Map<String, dynamic>.from(e))),
+          'meta': body['meta'] ?? {},
+        };
+      }
+    } catch (_) {}
+    return {'cvs': [], 'meta': {}};
+  }
+
+  static Future<Map<String, dynamic>> toggleCvReview(int id) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/admin/cvs/$id/toggle-review'),
+      headers: _headers,
+    ).timeout(_timeout);
+    return jsonDecode(res.body);
+  }
+
+  static Future<bool> adminDeleteCv(int id) async {
+    final res = await http.delete(
+      Uri.parse('$baseUrl/admin/cvs/$id'),
+      headers: _headers,
+    ).timeout(_timeout);
+    return res.statusCode == 200;
+  }
 }
 

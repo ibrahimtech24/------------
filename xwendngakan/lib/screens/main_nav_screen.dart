@@ -8,6 +8,8 @@ import 'home_screen.dart';
 import 'search_screen.dart';
 import 'full_map_screen.dart';
 import 'register_screen.dart';
+import 'cv_bank_screen.dart';
+import 'teachers_screen.dart';
 import 'settings_screen.dart';
 
 class MainNavScreen extends StatefulWidget {
@@ -21,7 +23,6 @@ class _MainNavScreenState extends State<MainNavScreen>
     with TickerProviderStateMixin {
   int _currentIndex = 0;
   late final List<AnimationController> _iconControllers;
-  late final List<Animation<double>> _iconAnimations;
   late final List<Widget> _screens;
 
   List<_NavItemData> _navItems(BuildContext context) => [
@@ -31,20 +32,20 @@ class _MainNavScreenState extends State<MainNavScreen>
       label: S.of(context, 'navHome'),
     ),
     _NavItemData(
-      icon: Iconsax.search_normal_1,
-      activeIcon: Iconsax.search_favorite,
-      label: S.of(context, 'navSearch'),
-    ),
-    _NavItemData(
-      icon: Iconsax.map_1,
-      activeIcon: Iconsax.map,
-      label: S.of(context, 'navMap'),
-    ),
-    _NavItemData(
       icon: Iconsax.add_circle,
       activeIcon: Iconsax.add_circle5,
       label: S.of(context, 'navRegister'),
       isCenter: true,
+    ),
+    _NavItemData(
+      icon: Iconsax.document_text,
+      activeIcon: Iconsax.document_text_1,
+      label: 'سیڤی',
+    ),
+    _NavItemData(
+      icon: Iconsax.teacher,
+      activeIcon: Iconsax.teacher,
+      label: 'مامۆستا',
     ),
     _NavItemData(
       icon: Iconsax.setting_2,
@@ -58,9 +59,9 @@ class _MainNavScreenState extends State<MainNavScreen>
     super.initState();
     _screens = [
       const HomeScreen(),
-      const SearchScreen(),
-      const FullMapScreen(),
       RegisterScreen(onSubmitted: () => _onTap(0)),
+      const CvBankScreen(),
+      const TeachersScreen(),
       const SettingsScreen(),
     ];
     _iconControllers = List.generate(
@@ -70,11 +71,6 @@ class _MainNavScreenState extends State<MainNavScreen>
         duration: const Duration(milliseconds: 350),
       ),
     );
-    _iconAnimations = _iconControllers.map((c) {
-      return Tween<double>(begin: 1.0, end: 0.85).animate(
-        CurvedAnimation(parent: c, curve: Curves.easeOutBack),
-      );
-    }).toList();
     // Set initial active state
     _iconControllers[0].value = 1.0;
   }
@@ -101,8 +97,6 @@ class _MainNavScreenState extends State<MainNavScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
-
     return Directionality(
       textDirection: Directionality.of(context),
       child: Scaffold(
@@ -113,7 +107,7 @@ class _MainNavScreenState extends State<MainNavScreen>
         ),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF0D1117) : Colors.white,
+            color: isDark ? const Color(0xFF0F172A) : Colors.white,
             border: Border(
               top: BorderSide(
                 color: isDark
@@ -172,7 +166,7 @@ class _MainNavScreenState extends State<MainNavScreen>
             color: isActive
                 ? AppTheme.primary
                 : (isDark
-                    ? const Color(0xFF4A5568)
+                    ? const Color(0xFFE2E8F0)
                     : const Color(0xFFa0aec0)),
           ),
           const SizedBox(height: 4),
@@ -184,7 +178,7 @@ class _MainNavScreenState extends State<MainNavScreen>
               color: isActive
                   ? AppTheme.primary
                   : (isDark
-                      ? const Color(0xFF4A5568)
+                      ? const Color(0xFFE2E8F0)
                       : const Color(0xFFa0aec0)),
             ),
           ),
@@ -235,7 +229,7 @@ class _MainNavScreenState extends State<MainNavScreen>
               color: isActive
                   ? Colors.white
                   : (isDark
-                      ? AppTheme.primary.withValues(alpha: 0.6)
+                      ? AppTheme.primary.withValues(alpha: 0.9)
                       : AppTheme.primary.withValues(alpha: 0.5)),
             ),
           ),
@@ -248,7 +242,7 @@ class _MainNavScreenState extends State<MainNavScreen>
               color: isActive
                   ? AppTheme.primary
                   : (isDark
-                      ? const Color(0xFF4A5568)
+                      ? const Color(0xFFE2E8F0)
                       : const Color(0xFFa0aec0)),
             ),
           ),
@@ -270,5 +264,110 @@ class _NavItemData {
     required this.label,
     this.isCenter = false,
   });
+}
+
+// ── Combined Search + Map Screen ────────────────────────────
+
+class _SearchMapScreen extends StatefulWidget {
+  const _SearchMapScreen();
+
+  @override
+  State<_SearchMapScreen> createState() => _SearchMapScreenState();
+}
+
+class _SearchMapScreenState extends State<_SearchMapScreen> {
+  int _tab = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFF);
+
+    return Scaffold(
+      backgroundColor: bgColor,
+      body: Column(
+        children: [
+          // Toggle strip
+          SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.06),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    _buildToggle(0, Iconsax.search_normal_1, 'گەران', isDark),
+                    _buildToggle(1, Iconsax.map_1, 'نەخشە', isDark),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Content
+          Expanded(
+            child: IndexedStack(
+              index: _tab,
+              children: const [
+                SearchScreen(),
+                FullMapScreen(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggle(int index, IconData icon, String label, bool isDark) {
+    final isActive = _tab == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          if (_tab != index) setState(() => _tab = index);
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isActive ? AppTheme.primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: isActive
+                    ? Colors.white
+                    : (isDark ? const Color(0xFFF1F5F9) : const Color(0xFF94A3B8)),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: isActive
+                      ? Colors.white
+                      : (isDark ? const Color(0xFFF1F5F9) : const Color(0xFF94A3B8)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 

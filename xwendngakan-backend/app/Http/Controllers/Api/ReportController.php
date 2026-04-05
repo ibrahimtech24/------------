@@ -52,4 +52,81 @@ class ReportController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Admin: Get all reports.
+     */
+    public function adminIndex(Request $request)
+    {
+        $query = Report::with('institution')->latest();
+
+        $status = $request->get('status', 'pending');
+        if (in_array($status, ['pending', 'reviewed', 'dismissed'])) {
+            $query->where('status', $status);
+        }
+        // 'all' returns everything
+
+        $reports = $query->get()->map(function ($report) {
+            return [
+                'id'             => $report->id,
+                'institution_id' => $report->institution_id,
+                'institution'    => $report->institution ? [
+                    'id'  => $report->institution->id,
+                    'nku' => $report->institution->nku,
+                    'nen' => $report->institution->nen,
+                    'nar' => $report->institution->nar,
+                    'type'=> $report->institution->type,
+                ] : null,
+                'user_id'        => $report->user_id,
+                'type'           => $report->type,
+                'description'    => $report->description,
+                'status'         => $report->status,
+                'created_at'     => $report->created_at,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data'    => $reports,
+            'meta'    => [
+                'pending'   => Report::where('status', 'pending')->count(),
+                'reviewed'  => Report::where('status', 'reviewed')->count(),
+                'dismissed' => Report::where('status', 'dismissed')->count(),
+                'total'     => Report::count(),
+            ],
+        ]);
+    }
+
+    /**
+     * Admin: Update report status (reviewed / dismissed).
+     */
+    public function updateStatus(Request $request, int $id)
+    {
+        $request->validate([
+            'status' => 'required|in:reviewed,dismissed,pending',
+        ]);
+
+        $report = Report::findOrFail($id);
+        $report->status = $request->status;
+        $report->save();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $report,
+            'message' => 'ستاتوسی ڕاپۆرتەکە نوێکرایەوە.',
+        ]);
+    }
+
+    /**
+     * Admin: Delete a report.
+     */
+    public function adminDestroy(int $id)
+    {
+        Report::findOrFail($id)->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'ڕاپۆرتەکە سڕایەوە.',
+        ]);
+    }
 }

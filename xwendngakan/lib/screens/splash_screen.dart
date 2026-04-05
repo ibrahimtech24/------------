@@ -4,7 +4,7 @@ import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
 import 'language_screen.dart';
 import 'onboarding_screen.dart';
-import 'section_selection_screen.dart';
+import 'main_nav_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -104,7 +104,7 @@ class _SplashScreenState extends State<SplashScreen>
     } else if (!prov.hasSelectedLanguage) {
       destination = const LanguageScreen();
     } else {
-      destination = const SectionSelectionScreen();
+      destination = const MainNavScreen();
     }
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(

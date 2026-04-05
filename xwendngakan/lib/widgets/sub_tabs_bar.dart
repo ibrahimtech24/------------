@@ -33,7 +33,7 @@ class SubTabsBar extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF161B22) : const Color(0xFFF1F5F9),
+              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -51,7 +51,7 @@ class SubTabsBar extends StatelessWidget {
                       duration: const Duration(milliseconds: 200),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
-                        color: isOn ? (isDark ? const Color(0xFF262D3D) : Colors.white) : Colors.transparent,
+                        color: isOn ? (isDark ? const Color(0xFF334155) : Colors.white) : Colors.transparent,
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: isOn
                             ? [
@@ -72,7 +72,7 @@ class SubTabsBar extends StatelessWidget {
                               fontWeight: isOn ? FontWeight.w700 : FontWeight.w600,
                               color: isOn
                                   ? AppTheme.primary
-                                  : (isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
+                                  : (isDark ? const Color(0xFFF1F5F9) : const Color(0xFF94A3B8)),
                             ),
                           ),
                           if (cnt > 0) ...[
@@ -92,7 +92,7 @@ class SubTabsBar extends StatelessWidget {
                                   fontWeight: FontWeight.bold,
                                   color: isOn
                                       ? AppTheme.primary
-                                      : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
+                                      : (isDark ? const Color(0xFFF1F5F9) : const Color(0xFF64748B)),
                                 ),
                               ),
                             ),

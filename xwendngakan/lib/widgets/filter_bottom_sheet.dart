@@ -46,7 +46,7 @@ class FilterBottomSheet extends StatelessWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB),
+              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFFE5E7EB),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -80,14 +80,14 @@ class FilterBottomSheet extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
-                        color: isDark ? Colors.white : const Color(0xFF1F2937),
+                        color: isDark ? Colors.white : const Color(0xFF1E293B),
                       ),
                     ),
                     Text(
                       S.of(context, 'findFavorite'),
                       style: TextStyle(
                         fontSize: 12,
-                        color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
+                        color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF9CA3AF),
                       ),
                     ),
                   ],
@@ -127,7 +127,7 @@ class FilterBottomSheet extends StatelessWidget {
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 20),
             height: 1,
-            color: isDark ? const Color(0xFF1F2937) : const Color(0xFFF3F4F6),
+            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF3F4F6),
           ),
 
           // Filter options
@@ -142,16 +142,16 @@ class FilterBottomSheet extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+                    color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF6B7280),
                   ),
                 ),
                 const SizedBox(height: 10),
                 Container(
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF111827) : const Color(0xFFF9FAFB),
+                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF9FAFB),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: isDark ? const Color(0xFF1F2937) : const Color(0xFFE5E7EB),
+                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE5E7EB),
                     ),
                   ),
                   child: DropdownButtonHideUnderline(
@@ -159,26 +159,26 @@ class FilterBottomSheet extends StatelessWidget {
                       value: prov.filterType.isEmpty ? null : prov.filterType,
                       hint: Row(
                         children: [
-                          Icon(Iconsax.category, size: 18, color: isDark ? const Color(0xFF4B5563) : const Color(0xFF9CA3AF)),
+                          Icon(Iconsax.category, size: 18, color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF9CA3AF)),
                           const SizedBox(width: 10),
                           Text(
                             S.of(context, 'allTypes'),
                             style: TextStyle(
                               fontSize: 14,
-                              color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
+                              color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF9CA3AF),
                             ),
                           ),
                         ],
                       ),
                       isExpanded: true,
-                      icon: Icon(Iconsax.arrow_down_1, size: 18, color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF)),
+                      icon: Icon(Iconsax.arrow_down_1, size: 18, color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF9CA3AF)),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                       borderRadius: BorderRadius.circular(16),
-                      dropdownColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+                      dropdownColor: isDark ? const Color(0xFF1E293B) : Colors.white,
                       items: prov.localizedTypeLabels.entries
                           .map((e) => DropdownMenuItem(
                                 value: e.key,
-                                child: Text(e.value, style: TextStyle(fontSize: 14, color: isDark ? Colors.white : const Color(0xFF1F2937))),
+                                child: Text(e.value, style: TextStyle(fontSize: 14, color: isDark ? Colors.white : const Color(0xFF1E293B))),
                               ))
                           .toList(),
                       onChanged: (v) => prov.setFilterType(v ?? ''),
@@ -194,16 +194,16 @@ class FilterBottomSheet extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+                    color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF6B7280),
                   ),
                 ),
                 const SizedBox(height: 10),
                 Container(
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF111827) : const Color(0xFFF9FAFB),
+                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF9FAFB),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: isDark ? const Color(0xFF1F2937) : const Color(0xFFE5E7EB),
+                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE5E7EB),
                     ),
                   ),
                   child: DropdownButtonHideUnderline(
@@ -211,26 +211,26 @@ class FilterBottomSheet extends StatelessWidget {
                       value: prov.filterCity.isEmpty ? null : prov.filterCity,
                       hint: Row(
                         children: [
-                          Icon(Iconsax.location, size: 18, color: isDark ? const Color(0xFF4B5563) : const Color(0xFF9CA3AF)),
+                          Icon(Iconsax.location, size: 18, color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF9CA3AF)),
                           const SizedBox(width: 10),
                           Text(
                             S.of(context, 'allCities'),
                             style: TextStyle(
                               fontSize: 14,
-                              color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
+                              color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF9CA3AF),
                             ),
                           ),
                         ],
                       ),
                       isExpanded: true,
-                      icon: Icon(Iconsax.arrow_down_1, size: 18, color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF)),
+                      icon: Icon(Iconsax.arrow_down_1, size: 18, color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF9CA3AF)),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                       borderRadius: BorderRadius.circular(16),
-                      dropdownColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+                      dropdownColor: isDark ? const Color(0xFF1E293B) : Colors.white,
                       items: (AppConstants.cities['عێراق'] ?? [])
                           .map((c) => DropdownMenuItem(
                                 value: c,
-                                child: Text(c, style: TextStyle(fontSize: 14, color: isDark ? Colors.white : const Color(0xFF1F2937))),
+                                child: Text(c, style: TextStyle(fontSize: 14, color: isDark ? Colors.white : const Color(0xFF1E293B))),
                               ))
                           .toList(),
                       onChanged: (v) => prov.setFilterCity(v ?? ''),

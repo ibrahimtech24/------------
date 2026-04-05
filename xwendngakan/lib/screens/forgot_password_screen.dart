@@ -152,10 +152,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? const Color(0xFF0D1117) : const Color(0xFFF8FAFF);
-    final cardColor = isDark ? const Color(0xFF161B22) : Colors.white;
+    final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFF);
+    final cardColor = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDark ? Colors.white : Colors.black87;
-    final hintColor = isDark ? Colors.white38 : Colors.black38;
+    final hintColor = isDark ? Colors.white : Colors.black38;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -225,7 +225,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             : Text(
                 '$step',
                 style: TextStyle(
-                  color: isActive ? Colors.white : (isDark ? Colors.white38 : Colors.black38),
+                  color: isActive ? Colors.white : (isDark ? Colors.white : Colors.black38),
                   fontWeight: FontWeight.bold,
                 ),
               ),

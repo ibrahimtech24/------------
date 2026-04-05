@@ -100,5 +100,20 @@ Route::middleware('auth:sanctum')->group(function () {
     // Admin: Post management
     Route::get('/admin/posts', [PostController::class, 'adminIndex']);
     Route::post('/admin/posts/{id}/toggle-approval', [PostController::class, 'toggleApproval']);
+
+    // Admin: Institution management
+    Route::get('/admin/institutions', [InstitutionController::class, 'adminIndex']);
+    Route::post('/admin/institutions/{id}/toggle-approval', [InstitutionController::class, 'toggleApproval']);
+    Route::delete('/admin/institutions/{id}', [InstitutionController::class, 'adminDestroy']);
+
+    // Admin: Report management
+    Route::get('/admin/reports', [ReportController::class, 'adminIndex']);
+    Route::patch('/admin/reports/{id}/status', [ReportController::class, 'updateStatus']);
+    Route::delete('/admin/reports/{id}', [ReportController::class, 'adminDestroy']);
+
+    // Admin: CV management
+    Route::get('/admin/cvs', [CvController::class, 'adminIndex']);
+    Route::post('/admin/cvs/{id}/toggle-review', [CvController::class, 'toggleReview']);
+    Route::delete('/admin/cvs/{id}', [CvController::class, 'adminDestroy']);
 });
   
