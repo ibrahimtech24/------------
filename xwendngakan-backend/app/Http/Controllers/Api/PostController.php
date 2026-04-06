@@ -31,11 +31,13 @@ class PostController extends Controller
      */
     public function store(Request $request, int $institutionId)
     {
-        // Only admins can create posts
-        if (!$request->user()->is_admin) {
+        $institution = \App\Models\Institution::findOrFail($institutionId);
+
+        // Only admins or the institution owner can create posts
+        if (!$request->user()->is_admin && $request->user()->id !== $institution->user_id) {
             return response()->json([
                 'success' => false,
-                'message' => 'ڕێگەپێدراو نیت بۆ دروستکردنی پۆست.',
+                'message' => 'ڕێگەپێدراو نیت بۆ دروستکردنی پۆست بۆ ئەم دامەزراوەیە.',
             ], 403);
         }
 
@@ -84,7 +86,7 @@ class PostController extends Controller
         $post = Post::findOrFail($id);
 
         // Only post owner or admin can update
-        if ($request->user()->id !== $post->user_id) {
+        if ($request->user()->id !== $post->user_id && !$request->user()->is_admin) {
             return response()->json([
                 'success' => false,
                 'message' => 'ڕێگەپێنەدراوە.',
@@ -114,6 +116,14 @@ class PostController extends Controller
     public function destroy(Request $request, int $id)
     {
         $post = Post::findOrFail($id);
+
+        // Only post owner or admin can delete
+        if ($request->user()->id !== $post->user_id && !$request->user()->is_admin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'ڕێگەپێنەدراوە.',
+            ], 403);
+        }
 
         // Delete associated image if exists
         if ($post->image && Storage::disk('public')->exists($post->image)) {

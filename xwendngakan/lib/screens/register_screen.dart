@@ -17,7 +17,8 @@ import 'map_picker_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   final VoidCallback? onSubmitted;
-  const RegisterScreen({super.key, this.onSubmitted});
+  final bool hideAppBar;
+  const RegisterScreen({super.key, this.onSubmitted, this.hideAppBar = false});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -84,7 +85,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(
+      appBar: widget.hideAppBar ? null : AppBar(
         title: Text(
           S.of(context, 'registerInstitution'),
           style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
@@ -914,6 +915,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         if (mounted) {
           AppSnackbar.success(context, S.of(context, 'submitSuccess'));
         }
+        
+        // گەڕانەوە بۆ هۆم
+        widget.onSubmitted?.call();
       } else {
         final msg = res['message'] ?? S.of(context, 'errorOccurred');
         if (mounted) AppSnackbar.error(context, '${S.of(context, 'error')} $msg');
@@ -926,9 +930,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
-    
-    // گەڕانەوە بۆ هۆم
-    widget.onSubmitted?.call();
   }
 
   // ─── Colleges/Departments Helpers ───

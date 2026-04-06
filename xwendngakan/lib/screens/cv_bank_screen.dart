@@ -3,61 +3,18 @@ import '../widgets/cv_form_screen.dart';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 
-class CvBankScreen extends StatefulWidget {
+class CvBankScreen extends StatelessWidget {
   const CvBankScreen({super.key});
-
-  @override
-  State<CvBankScreen> createState() => _CvBankScreenState();
-}
-
-class _CvBankScreenState extends State<CvBankScreen> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(' CV'),
+        title: const Text('تۆمارکردنی CV'),
         centerTitle: true,
         elevation: 0,
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: AppTheme.primary,
-          labelColor: AppTheme.primary,
-          unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-          indicatorWeight: 3,
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-          tabs: const [
-            Tab(
-              icon: Icon(Icons.add_circle_outline_rounded),
-              text: 'تۆمارکردنی CV',
-            ),
-            Tab(
-              icon: Icon(Icons.people_alt_rounded),
-              text: 'بینینی CVکان',
-            ),
-          ],
-        ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: const [
-          CvFormScreen(),
-          CvListView(),
-        ],
-      ),
+      body: const CvFormScreen(),
     );
   }
 }

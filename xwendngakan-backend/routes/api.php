@@ -127,6 +127,51 @@ Route::middleware('auth:sanctum')->group(function () {
         return response()->json(['success' => true]);
     });
 
+    // Institution Requests
+    Route::get('/my-institution-request', function () {
+        $request = \App\Models\InstitutionRequest::where('user_id', auth()->id())->latest()->first();
+        return response()->json([
+            'success' => true,
+            'data' => $request
+        ]);
+    });
+
+    Route::get('/my-institution', function () {
+        $inst = \App\Models\Institution::where('user_id', auth()->id())->first();
+        return response()->json([
+            'success' => true,
+            'data' => $inst
+        ]);
+    });
+
+    Route::post('/institution-requests', function (Illuminate\Http\Request $request) {
+        $request->validate([
+            'name' => 'required',
+            'phone' => 'required',
+        ]);
+
+        $instReq = \App\Models\InstitutionRequest::updateOrCreate(
+            ['user_id' => auth()->id()],
+            [
+                'name' => $request->name,
+                'phone' => $request->phone,
+                'message' => $request->message,
+                'status' => 'pending'
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'داواکاریەکەت بە سەرکەوتوویی نێردرا، بە زوترین کات پەیوەندیت پێوە دەکرێت',
+            'data' => $instReq
+        ]);
+    });
+
+    Route::delete('/institution-requests/clear', function () {
+        \App\Models\InstitutionRequest::where('user_id', auth()->id())->delete();
+        return response()->json(['success' => true]);
+    });
+
     // Institution CRUD
     Route::post('/institutions', [InstitutionController::class, 'store']);
     Route::put('/institutions/{id}', [InstitutionController::class, 'update']);

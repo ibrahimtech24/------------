@@ -28,6 +28,8 @@ class Institution {
   // Location
   double? lat;
   double? lng;
+  // User mapping
+  int? userId;
   // Images
   String logo;
   String img;
@@ -61,6 +63,7 @@ class Institution {
     this.logo = '',
     this.img = '',
     this.approved = false,
+    this.userId,
   });
 
   String get displayName => nku.isNotEmpty ? nku : nen;
@@ -104,6 +107,7 @@ class Institution {
         'logo': logo,
         'img': img,
         'approved': approved,
+        'user_id': userId,
       };
 
   /// Build the server base URL (without /api)
@@ -144,5 +148,6 @@ class Institution {
         logo: _resolveUrl(j['logo']),
         img: _resolveUrl(j['img']),
         approved: j['approved'] ?? false,
+        userId: j['user_id'] != null ? int.tryParse(j['user_id'].toString()) : null,
       );
 }

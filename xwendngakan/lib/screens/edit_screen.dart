@@ -10,8 +10,9 @@ import '../services/app_localizations.dart';
 
 class EditScreen extends StatefulWidget {
   final Institution institution;
+  final bool hideAppBar;
 
-  const EditScreen({super.key, required this.institution});
+  const EditScreen({super.key, required this.institution, this.hideAppBar = false});
 
   @override
   State<EditScreen> createState() => _EditScreenState();
@@ -71,7 +72,7 @@ class _EditScreenState extends State<EditScreen> {
     final cities = AppConstants.cities[widget.institution.country] ?? [];
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: widget.hideAppBar ? null : AppBar(
         title: Text(S.of(context, 'editAdmin'),
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
         centerTitle: true,
@@ -240,7 +241,9 @@ class _EditScreenState extends State<EditScreen> {
     d.img = _imgC.text.trim();
     d.approved = true;
     context.read<AppProvider>().updateInstitution(d);
-    Navigator.pop(context);
+    if (!widget.hideAppBar) {
+      Navigator.pop(context);
+    }
     AppSnackbar.success(context, S.of(context, 'savedSuccess'));
   }
 
@@ -309,7 +312,9 @@ class _EditScreenState extends State<EditScreen> {
                     onPressed: () {
                       context.read<AppProvider>().deleteInstitution(widget.institution.id);
                       Navigator.pop(ctx);
-                      Navigator.pop(context);
+                      if (!widget.hideAppBar) {
+                        Navigator.pop(context);
+                      }
                       AppSnackbar.deleted(context, S.of(context, 'deletedSuccess'));
                     },
                     icon: const Icon(Iconsax.trash, size: 18, color: Colors.white),

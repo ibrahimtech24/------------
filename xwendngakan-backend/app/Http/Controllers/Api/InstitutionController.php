@@ -87,6 +87,7 @@ class InstitutionController extends Controller
         $data['kg_age']     = $request->input('kgAge', '');
         $data['kg_hours']   = $request->input('kgHours', '');
         $data['approved']   = false; // Always pending
+        $data['user_id']    = auth()->id(); // Assign to the actual creator
 
         // Handle logo file upload
         if ($request->hasFile('logo')) {

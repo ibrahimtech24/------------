@@ -7,8 +7,8 @@ import 'package:iconsax/iconsax.dart';
 import '../services/app_localizations.dart';
 import '../theme/app_theme.dart';
 import 'home_screen.dart';
-import 'register_screen.dart';
 import 'cv_bank_screen.dart';
+import 'institution_request_screen.dart';
 import 'teachers_screen.dart';
 import 'settings_screen.dart';
 
@@ -48,15 +48,15 @@ class _MainNavScreenState extends State<MainNavScreen> with TickerProviderStateM
       label: S.of(context, 'navHome'),
     ),
     _NavItemData(
+      icon: Iconsax.document_text,
+      activeIcon: Iconsax.document_text_1,
+      label: 'سیڤی',
+    ),
+    _NavItemData(
       icon: Iconsax.add_circle,
       activeIcon: Iconsax.add_circle5,
       label: S.of(context, 'navRegister'),
       isCenter: true,
-    ),
-    _NavItemData(
-      icon: Iconsax.document_text,
-      activeIcon: Iconsax.document_text_1,
-      label: 'سیڤی',
     ),
     _NavItemData(
       icon: Iconsax.teacher,
@@ -75,8 +75,10 @@ class _MainNavScreenState extends State<MainNavScreen> with TickerProviderStateM
     super.initState();
     _screens = [
       const HomeScreen(),
-      RegisterScreen(onSubmitted: () => _onTap(0)),
-      const CvBankScreen(),
+      const Scaffold(
+        body: SafeArea(child: CvListView()),
+      ),
+      const InstitutionRequestScreen(),
       const TeachersScreen(),
       const SettingsScreen(),
     ];

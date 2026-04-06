@@ -691,6 +691,59 @@ class ApiService {
     return {};
   }
 
+  // ── Institution Requests ──
+  static Future<Map<String, dynamic>?> getInstitutionRequestStatus() async {
+    try {
+      final res = await http.get(Uri.parse('$baseUrl/my-institution-request'), headers: _headers);
+      if (res.statusCode == 200) {
+        return jsonDecode(res.body)['data'];
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  static Future<Institution?> getMyInstitution() async {
+    try {
+      final res = await http.get(Uri.parse('$baseUrl/my-institution'), headers: _headers);
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body)['data'];
+        if (data != null) {
+          return Institution.fromJson(data);
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  static Future<void> clearInstitutionRequest() async {
+    try {
+      await http.delete(
+        Uri.parse('$baseUrl/institution-requests/clear'),
+        headers: _headers,
+      ).timeout(_timeout);
+    } catch (_) {}
+  }
+
+  static Future<Map<String, dynamic>> submitInstitutionRequest({
+    required String name,
+    required String phone,
+    required String message,
+  }) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$baseUrl/institution-requests'),
+        headers: _headers,
+        body: jsonEncode({
+          'name': name,
+          'phone': phone,
+          'message': message,
+        }),
+      ).timeout(_timeout);
+      return jsonDecode(res.body);
+    } catch (_) {}
+    return {'success': false};
+  }
+
   // ── Teachers ──
 
   static Future<Map<String, dynamic>?> getTeacherRequestStatus() async {
