@@ -5,7 +5,7 @@ import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_snackbar.dart';
 import '../services/app_localizations.dart';
-import 'main_nav_screen.dart';
+import 'section_selection_screen.dart';
 import 'teachers_screen.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -100,7 +100,7 @@ class _SignupScreenState extends State<SignupScreen>
 
         Navigator.of(context).pushAndRemoveUntil(
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) => const MainNavScreen(),
+            pageBuilder: (_, __, ___) => const SectionSelectionScreen(),
             transitionDuration: const Duration(milliseconds: 500),
             transitionsBuilder: (_, animation, __, child) {
               return FadeTransition(

@@ -6,7 +6,7 @@ import '../theme/app_theme.dart';
 import '../widgets/app_snackbar.dart';
 import '../services/app_localizations.dart';
 import 'signup_screen.dart';
-import 'main_nav_screen.dart';
+import 'section_selection_screen.dart';
 import 'forgot_password_screen.dart';
 import 'teachers_screen.dart';
 
@@ -84,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen>
             context, result['message'] ?? S.of(context, 'loginSuccess'));
         Navigator.of(context).pushAndRemoveUntil(
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) => const MainNavScreen(),
+            pageBuilder: (_, __, ___) => const SectionSelectionScreen(),
             transitionDuration: const Duration(milliseconds: 500),
             transitionsBuilder: (_, animation, __, child) {
               return FadeTransition(

@@ -5,7 +5,7 @@ import '../theme/app_theme.dart';
 import 'login_screen.dart';
 import 'main_nav_screen.dart';
 import 'cv_bank_screen.dart';
-import 'teachers_screen.dart';
+import 'teacher_request_screen.dart';
 
 class SectionSelectionScreen extends StatefulWidget {
   const SectionSelectionScreen({super.key});
@@ -157,7 +157,7 @@ class _SectionSelectionScreenState extends State<SectionSelectionScreen>
                                 ),
                                 const SizedBox(height: 24),
                                 const Text(
-                                  'خوێندنگاکانم',
+                                  '📚 خوێندنگاکانم',
                                   style: TextStyle(
                                     fontSize: 30,
                                     fontWeight: FontWeight.w900,
@@ -167,7 +167,7 @@ class _SectionSelectionScreenState extends State<SectionSelectionScreen>
                                 ),
                                 const SizedBox(height: 10),
                                 const Text(
-                                  'کوجی بەشەکەت هەڵبژێرە',
+                                  'دلیلی دامەزراوە پەروەردەییەکانی عێراق و کوردستان',
                                   style: TextStyle(
                                     fontSize: 15,
                                     color: Color(0xFF64748B),
@@ -187,8 +187,8 @@ class _SectionSelectionScreenState extends State<SectionSelectionScreen>
                         children: [
                           _buildAnimatedCard(
                             index: 1,
-                            title: 'دامەزراوە پەروەردەییەکان',
-                            subtitle: 'زانکۆ، پەیمانگا و قوتابخانە — هەموو لەک یەک شوێن',
+                            title: 'دامەزراوە ئەکادیمییەکان',
+                            subtitle: 'زانکۆ • پەیمانگە • قوتابخانە',
                             icon: Icons.account_balance_rounded,
                             color1: AppTheme.primary,
                             color2: const Color(0xFF60A5FA),
@@ -216,8 +216,8 @@ class _SectionSelectionScreenState extends State<SectionSelectionScreen>
                           const SizedBox(height: 24),
                           _buildAnimatedCard(
                             index: 2,
-                            title: 'بانکی سیڤی',
-                            subtitle: 'سیڤیی حەرفەییت دروستبکە و بھێجبكەوەکان بدۆزەرەوە',
+                            title: 'بانکی CV',
+                            subtitle: 'سیڤی • هەلی کار',
                             icon: Icons.badge_rounded,
                             color1: AppTheme.success,
                             color2: const Color(0xFF34D399),
@@ -245,8 +245,8 @@ class _SectionSelectionScreenState extends State<SectionSelectionScreen>
                           const SizedBox(height: 24),
                           _buildAnimatedCard(
                             index: 3,
-                            title: 'مامۆستاکانم',
-                            subtitle: 'مامۆستاکانت بدۆزەرەوە و بەڕاستێ بیکەوەڌیبکە',
+                            title: 'ماموستاکانم',
+                            subtitle: 'ماموستای تایبەت • زانکۆ • قوتابخانە',
                             icon: Icons.school_rounded,
                             color1: AppTheme.warning,
                             color2: const Color(0xFFFCD34D),
@@ -255,7 +255,7 @@ class _SectionSelectionScreenState extends State<SectionSelectionScreen>
                               if (prov.isLoggedIn) {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (_) => const TeachersScreen()),
+                                  MaterialPageRoute(builder: (_) => const TeacherRequestScreen()),
                                 );
                               } else {
                                 await Navigator.push(
@@ -265,7 +265,7 @@ class _SectionSelectionScreenState extends State<SectionSelectionScreen>
                                 if (context.mounted && context.read<AppProvider>().isLoggedIn) {
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(builder: (_) => const TeachersScreen()),
+                                    MaterialPageRoute(builder: (_) => const TeacherRequestScreen()),
                                   );
                                 }
                               }

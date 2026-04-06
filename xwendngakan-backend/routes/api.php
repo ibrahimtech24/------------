@@ -54,6 +54,7 @@ Route::post('/teachers', [TeacherController::class, 'store']);
 Route::get('/teachers/{id}', [TeacherController::class, 'show']);
 Route::get('/teacher-stats', [TeacherController::class, 'stats']);
 
+
 // Institution types
 Route::get('/institution-types', function () {
     $types = InstitutionType::active()->ordered()->get(['key', 'name', 'name_en', 'name_ar', 'emoji', 'icon']);
@@ -86,6 +87,45 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/fcm-token', [AuthController::class, 'updateFcmToken']);
     Route::post('/toggle-notifications', [AuthController::class, 'toggleNotifications']);
+
+    // Teacher Requests
+    Route::get('/my-teacher-request', function () {
+        $request = \App\Models\TeacherRequest::where('user_id', auth()->id())->latest()->first();
+        return response()->json([
+            'success' => true,
+            'data' => $request
+        ]);
+    });
+
+    Route::post('/teacher-requests', function (\Illuminate\Http\Request $request) {
+        $request->validate([
+            'name' => 'required|string',
+            'phone' => 'required|string',
+            'message' => 'nullable|string',
+        ]);
+        
+        // Update existing or create new
+        $teacherRequest = \App\Models\TeacherRequest::updateOrCreate(
+            ['user_id' => auth()->id()],
+            [
+                'name' => $request->name,
+                'phone' => $request->phone,
+                'message' => $request->message,
+                'status' => 'pending'
+            ]
+        );
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'داواکاریەکەت بە سەرکەوتوویی نێردرا، بە زوترین کات پەیوەندیت پێوە دەکرێت',
+            'data' => $teacherRequest
+        ]);
+    });
+
+    Route::delete('/teacher-requests/clear', function () {
+        \App\Models\TeacherRequest::where('user_id', auth()->id())->delete();
+        return response()->json(['success' => true]);
+    });
 
     // Institution CRUD
     Route::post('/institutions', [InstitutionController::class, 'store']);

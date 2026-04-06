@@ -693,6 +693,49 @@ class ApiService {
 
   // ── Teachers ──
 
+  static Future<Map<String, dynamic>?> getTeacherRequestStatus() async {
+    try {
+      final res = await http.get(
+        Uri.parse('$baseUrl/my-teacher-request'),
+        headers: _headers,
+      ).timeout(_timeout);
+      if (res.statusCode == 200) {
+        return jsonDecode(res.body)['data'];
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  static Future<void> clearTeacherRequest() async {
+    try {
+      await http.delete(
+        Uri.parse('$baseUrl/teacher-requests/clear'),
+        headers: _headers,
+      ).timeout(_timeout);
+    } catch (_) {}
+  }
+
+  static Future<Map<String, dynamic>> submitTeacherRequest({
+    required String name,
+    required String phone,
+    String? message,
+  }) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$baseUrl/teacher-requests'),
+        headers: _headers,
+        body: jsonEncode({
+          'name': name,
+          'phone': phone,
+          'message': message,
+        }),
+      ).timeout(_timeout);
+      return jsonDecode(res.body);
+    } catch (e) {
+      return {'success': false, 'message': 'هەڵەیەک ڕوویدا: $e'};
+    }
+  }
+
   /// Submit a teacher registration
   static Future<Map<String, dynamic>> submitTeacher({
     required String name,

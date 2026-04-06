@@ -29,7 +29,7 @@ class _CvBankScreenState extends State<CvBankScreen> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('بانکی CV'),
+        title: const Text(' CV'),
         centerTitle: true,
         elevation: 0,
         bottom: TabBar(
