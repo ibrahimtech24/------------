@@ -691,6 +691,97 @@ class ApiService {
     return {};
   }
 
+  // ── Teachers ──
+
+  /// Submit a teacher registration
+  static Future<Map<String, dynamic>> submitTeacher({
+    required String name,
+    required String phone,
+    required String type,
+    required String city,
+    int? experienceYears,
+    int? hourlyRate,
+    String? about,
+    File? photo,
+    File? subjectPhoto,
+  }) async {
+    final uri = Uri.parse('$baseUrl/teachers');
+    final request = http.MultipartRequest('POST', uri);
+
+    request.headers['Accept'] = 'application/json';
+
+    request.fields['name'] = name;
+    request.fields['phone'] = phone;
+    request.fields['type'] = type;
+    request.fields['city'] = city;
+    if (experienceYears != null) {
+      request.fields['experience_years'] = experienceYears.toString();
+    }
+    if (hourlyRate != null) {
+      request.fields['hourly_rate'] = hourlyRate.toString();
+    }
+    if (about != null && about.isNotEmpty) request.fields['about'] = about;
+
+    if (photo != null && await photo.exists()) {
+      request.files.add(
+        await http.MultipartFile.fromPath('photo', photo.path),
+      );
+    }
+
+    if (subjectPhoto != null && await subjectPhoto.exists()) {
+      request.files.add(
+        await http.MultipartFile.fromPath('subject_photo', subjectPhoto.path),
+      );
+    }
+
+    try {
+      final streamedRes = await request.send().timeout(const Duration(seconds: 30));
+      final resBody = await streamedRes.stream.bytesToString();
+      return jsonDecode(resBody);
+    } catch (e) {
+      return {'success': false, 'message': 'هەڵەیەک ڕوویدا: $e'};
+    }
+  }
+
+  /// Get all teachers with optional filters
+  static Future<List<Map<String, dynamic>>> getTeachers({
+    String? type,
+    String? city,
+    String? search,
+  }) async {
+    try {
+      final params = <String, String>{};
+      if (type != null && type.isNotEmpty) params['type'] = type;
+      if (city != null && city.isNotEmpty) params['city'] = city;
+      if (search != null && search.isNotEmpty) params['search'] = search;
+
+      final uri = Uri.parse('$baseUrl/teachers').replace(
+        queryParameters: params.isNotEmpty ? params : null,
+      );
+      final res = await http.get(uri, headers: _headers).timeout(_timeout);
+
+      if (res.statusCode == 200) {
+        final List items = jsonDecode(res.body)['data'] ?? [];
+        return items.map((e) => Map<String, dynamic>.from(e)).toList();
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  /// Get teacher stats
+  static Future<Map<String, dynamic>> getTeacherStats() async {
+    try {
+      final res = await http.get(
+        Uri.parse('$baseUrl/teacher-stats'),
+        headers: _headers,
+      ).timeout(_timeout);
+      if (res.statusCode == 200) {
+        return jsonDecode(res.body)['data'];
+      }
+    } catch (_) {}
+    return {};
+  }
+
   // ── Admin: Institutions ──
 
   static Future<Map<String, dynamic>> getAdminInstitutions({String status = 'pending'}) async {

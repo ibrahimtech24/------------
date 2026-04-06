@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\AppVersionController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\CvController;
+use App\Http\Controllers\Api\TeacherController;
 use App\Models\InstitutionType;
 use Illuminate\Support\Facades\Route;
 
@@ -46,6 +47,12 @@ Route::post('/cvs', [CvController::class, 'store']);
 Route::get('/cvs/{id}', [CvController::class, 'show']);
 Route::get('/cv-stats', [CvController::class, 'stats']);
 Route::get('/education-levels', [CvController::class, 'educationLevels']);
+
+// Teacher Routes (public)
+Route::get('/teachers', [TeacherController::class, 'index']);
+Route::post('/teachers', [TeacherController::class, 'store']);
+Route::get('/teachers/{id}', [TeacherController::class, 'show']);
+Route::get('/teacher-stats', [TeacherController::class, 'stats']);
 
 // Institution types
 Route::get('/institution-types', function () {
@@ -115,5 +122,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/cvs', [CvController::class, 'adminIndex']);
     Route::post('/admin/cvs/{id}/toggle-review', [CvController::class, 'toggleReview']);
     Route::delete('/admin/cvs/{id}', [CvController::class, 'adminDestroy']);
+
+    // Admin: Teacher management
+    Route::get('/admin/teachers', [TeacherController::class, 'adminIndex']);
+    Route::post('/admin/teachers/{id}/toggle-approval', [TeacherController::class, 'toggleApproval']);
+    Route::delete('/admin/teachers/{id}', [TeacherController::class, 'adminDestroy']);
 });
   

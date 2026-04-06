@@ -8,6 +8,7 @@ import '../services/app_localizations.dart';
 import 'signup_screen.dart';
 import 'main_nav_screen.dart';
 import 'forgot_password_screen.dart';
+import 'teachers_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -236,6 +237,9 @@ class _LoginScreenState extends State<LoginScreen>
                         _buildSignupRow(isDark),
 
                         const SizedBox(height: 12),
+
+                        // Teacher registration
+                        _buildTeacherRegisterCard(isDark),
 
                       
 
@@ -641,6 +645,72 @@ class _LoginScreenState extends State<LoginScreen>
               child: Text(
                 S.of(context, 'createAccount'),
                 style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTeacherRegisterCard(bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      decoration: BoxDecoration(
+        color: isDark
+            ? const Color(0xFF1E293B).withValues(alpha: 0.5)
+            : Colors.white.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDark
+              ? const Color(0xFF334155).withValues(alpha: 0.4)
+              : const Color(0xFFE2E8F0).withValues(alpha: 0.6),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'ماموستایت؟',
+            style: TextStyle(
+              fontSize: 13,
+              color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF64748B),
+            ),
+          ),
+          const SizedBox(width: 4),
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  pageBuilder: (_, __, ___) => const TeacherFormView(),
+                  transitionDuration: const Duration(milliseconds: 500),
+                  transitionsBuilder: (_, animation, __, child) {
+                    final curved = CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOutCubic,
+                    );
+                    return FadeTransition(
+                      opacity: curved,
+                      child: ScaleTransition(
+                        scale: Tween<double>(begin: 0.94, end: 1.0).animate(curved),
+                        child: child,
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+            child: ShaderMask(
+              shaderCallback: (bounds) => const LinearGradient(
+                colors: [AppTheme.primary, AppTheme.accent],
+              ).createShader(bounds),
+              child: const Text(
+                'خۆت تۆمار بکە',
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
                   color: Colors.white,

@@ -5,6 +5,7 @@ import '../data/constants.dart';
 import '../models/institution.dart';
 import '../providers/app_provider.dart';
 import '../theme/app_theme.dart';
+import 'glass_container.dart';
 
 class InstitutionCard extends StatefulWidget {
   final Institution institution;
@@ -32,7 +33,6 @@ class _InstitutionCardState extends State<InstitutionCard>
     final colors = AppConstants.typeGradients[widget.institution.type] ??
         [AppTheme.primary, AppTheme.accent];
     final emoji = AppConstants.typeEmojis[widget.institution.type] ?? '🏫';
-    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
 
     // Is there a background cover image?
     final hasCover = widget.institution.img.isNotEmpty;
@@ -47,29 +47,14 @@ class _InstitutionCardState extends State<InstitutionCard>
         scale: _isPressed ? 0.95 : 1.0,
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,
-        child: Container(
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
-                blurRadius: 16,
-                offset: const Offset(0, 8),
-              ),
-              if (!isDark)
-                BoxShadow(
-                  color: colors.first.withValues(alpha: 0.05),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-            ],
-            border: Border.all(
-              color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
-              width: 1.5,
+        child: GlassContainer(
+          borderRadius: 20,
+          blur: 20,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
             ),
-          ),
-          child: Stack(
+            child: Stack(
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -260,6 +245,7 @@ class _InstitutionCardState extends State<InstitutionCard>
               ),
             ],
           ),
+        ),
         ),
       ),
     );
